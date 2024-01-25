@@ -1,6 +1,6 @@
 {
     shop = {
-        {text = "Деньги" sellPrice = 1, buyPrice = 1, minCount = 1, maxCount = 1024, fingerprint = {{dmg=0.0,id="customnpcs:npcMoney"}}, raw_name = {"item.npcmoney"}},
+        {text = "Деньги", sellPrice = 1, buyPrice = 1, minCount = 1, maxCount = 1024, fingerprint = {{dmg=0.0,id="customnpcs:npcMoney"}}, raw_name = {"item.npcmoney"}},
 
         {text = "Алмаз", buyPrice = 0.4, minCount = 1, maxCount = 2048, fingerprint = {{dmg=0.0,id="minecraft:diamond"}}, raw_name = {"item.diamond"}},
         {text = "Уголь", buyPrice = 0.05, minCount = 1, maxCount = 2048, fingerprint = {{dmg=0.0,id="minecraft:coal"}}, raw_name = {"item.coal"}},
