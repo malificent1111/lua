@@ -1402,7 +1402,7 @@ function login(name)
                     buttons.feedbacks.disabled = true
                     buttons.shop.disabled = true
                     buttons.freeFood.disabled = true
-                    buttons.lottery.disabled = true
+                    --buttons.lottery.disabled = true
                     scanMe()
                     toGui("main")
                 end
@@ -1426,7 +1426,7 @@ function login(name)
             buttons.feedbacks.disabled = false
             buttons.shop.disabled = false
             buttons.freeFood.disabled = false
-            buttons.lottery.disabled = false
+            --buttons.lottery.disabled = false
         end
         selector.setSlot(1)
         back(#guiPath)
@@ -1498,7 +1498,7 @@ end
 
 buttons = {
     --Кнопки, которые отвечаю за перемещение по менюшкам
-    back = {buttonIn = {"shop", "buyItem", "sellItem", "other", "ore", "freeFood", "lottery", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
+    back = {buttonIn = {"shop", "buyItem", "sellItem", "other", "ore", "freeFood", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
     backShop = {buttonIn = {"buy", "sell"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 31, y = 18, width = 11, height = 1, action = function() back() end},
     eula = {buttonIn = {"info"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Я прочитал и соглашаюсь со всем  ", x = 13, y = 18, width = 35, height = 1, action = function() session.eula = true buttons.eula.notVisible = true buttons.back.notVisible = false requestWithData(nil, {method = "merge", toMerge = {eula = true}, name = session.name}) toGui("main") end},
     shop = {buttonIn = {"main"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Магазин", x = 19, y = 5, width = 24, height = 3, action = function() toGui("shop") end},
@@ -1512,7 +1512,7 @@ buttons = {
     nextBuy = {buttonIn = {"buy"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() buttons.purchase.disabled = true item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("buyItem", {item = item}) guiVariables[guiPath[#guiPath]].amount = 0 end},
     nextSell = {buttonIn = {"sell"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("sellItem", {item = item}) end},
     freeFood = {buttonIn = {"other"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Бесплатная еда", x = 19, y = 8, width = 24, height = 3, action = function() toGui("freeFood") nextFood() end},
-    lottery = {buttonIn = {"other"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Лотерея", x = 19, y = 12, width = 24, height = 3, action = function() toGui("lottery") end},
+    --lottery = {buttonIn = {"other"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Лотерея", x = 19, y = 12, width = 24, height = 3, action = function() toGui("lottery") end},
     alert = {buttonIn = {"alert"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "Назад", x = 26, y = 15, width = 9, height = 1, action = function() back() end},
 
     zero = {buttonIn = {"buyItem"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "0", x = 29, y = 15, width = 3, height = 1, action = function() inputWrite("amount", 48) end},
@@ -1530,7 +1530,7 @@ buttons = {
     
     purchase = {buttonIn = {"buyItem"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Купить  ", x = 46, y = 18, width = 10, height = 1, action = function() purchase() end},
     getFood = {buttonIn = {"freeFood"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Получить еду", x = 19, y = 9, width = 24, height = 3, action = function() getFood() end},
-    playLottery = {buttonIn = {"lottery"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Купить билет", x = 19, y = 13, width = 24, height = 3, action = function() playLottery() end},
+    --playLottery = {buttonIn = {"lottery"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Купить билет", x = 19, y = 13, width = 24, height = 3, action = function() playLottery() end},
     
     sellScanOne = {buttonIn = {"sellItem"}, switch = true, active = false, focus = true, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "      1 слот      ", x = 22, y = 9, width = 18, height = 1, action = function(active) if active then itemScan = "one" else itemScan = false end end},
     sellScanMulti = {buttonIn = {"sellItem"}, switch = true, active = false, focus = true, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "  Весь инвентарь  ", x = 22, y = 11, width = 18, height = 1, action = function(active) if active then itemScan = "multi" else itemScan = false end end},
@@ -1558,7 +1558,7 @@ guiFunctions = {
     sell = sell,
     sellItem = sellItem,
     ore = ore,
-    lottery = lottery,
+    --lottery = lottery,
     feedbacks = feedbacks,
     info = info
 }
