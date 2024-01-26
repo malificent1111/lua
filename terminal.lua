@@ -856,7 +856,7 @@ end
 
 local function balance(y, account)
     fill(1, 1, 60, 1, " ", color.background)
-    setColorText(nil, y, "[0x68f029]Баланс: [0xffffff]" .. session.balance .. " R.I.P", color.background)
+    setColorText(nil, y, "[0x68f029]Баланс: [0xffffff]" .. session.balance .. " Emeralds", color.background)
 end
 
 local function purchase()
@@ -894,7 +894,7 @@ local function amount(key, force)
     local count = tonumber(writes.amount.input)
 
     if writes.amount.input ~= "" then
-        guiVariables[guiPath[#guiPath]].amount = math.floor(count * guiVariables[guiPath[#guiPath]].item.buyPrice) 
+        guiVariables[guiPath[#guiPath]].amount = count * guiVariables[guiPath[#guiPath]].item.buyPrice
         set(12, 5, tostring(guiVariables[guiPath[#guiPath]].amount) .. "       ", color.background, guiVariables[guiPath[#guiPath]].amount <= session.balance and 0xffffff or color.red)
         if force then
             set(10, 7, writes.amount.input, color.background, 0xffffff)
@@ -1018,8 +1018,8 @@ end
 
 local function lottery()
     balance(1)
-    setColorText(nil, 3, "[0x68f029]Мгновенная беспроигрышная лотерея. Цена билета — [0xffffff]" .. priceLottery .. " [0x68f029]рипов", color.background)
-    setColorText(19, 4, "[0x68f029]Супер-приз — [0xffffff]" .. superPrize .. " [0x68f029]рипов!", color.background)
+    setColorText(nil, 3, "[0x68f029]Мгновенная беспроигрышная лотерея. Цена билета — [0xffffff]" .. priceLottery .. " [0x68f029]эмов", color.background)
+    setColorText(19, 4, "[0x68f029]Супер-приз — [0xffffff]" .. superPrize .. " [0x68f029]эмов!", color.background)
     field()
 end
 
@@ -1043,7 +1043,7 @@ local function playLottery()
             end
         end
         rip = math.floor(rip)
-        setColorText(nil, 8, "[0x68f029]Вы выиграли: [0xffffff]" .. rip .. " [0x68f029]рипов", color.background)
+        setColorText(nil, 8, "[0x68f029]Вы выиграли: [0xffffff]" .. rip .. " [0x68f029]эмов", color.background)
         local msgToLog = session.name .. " won the lottery " .. rip .. " rip"
         log(msgToLog, session.name)
         session.balance = session.balance + rip
@@ -1426,7 +1426,7 @@ function login(name)
             buttons.feedbacks.disabled = false
             buttons.shop.disabled = false
             buttons.freeFood.disabled = false
-            buttons.lottery.disabled = true
+            buttons.lottery.disabled = false
         end
         selector.setSlot(1)
         back(#guiPath)
@@ -1498,7 +1498,7 @@ end
 
 buttons = {
     --Кнопки, которые отвечаю за перемещение по менюшкам
-    back = {buttonIn = {"shop", "buyItem", "sellItem", "other", "ore", "freeFood", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
+    back = {buttonIn = {"shop", "buyItem", "sellItem", "other", "ore", "freeFood", "lottery", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
     backShop = {buttonIn = {"buy", "sell"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 31, y = 18, width = 11, height = 1, action = function() back() end},
     eula = {buttonIn = {"info"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Я прочитал и соглашаюсь со всем  ", x = 13, y = 18, width = 35, height = 1, action = function() session.eula = true buttons.eula.notVisible = true buttons.back.notVisible = false requestWithData(nil, {method = "merge", toMerge = {eula = true}, name = session.name}) toGui("main") end},
     shop = {buttonIn = {"main"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Магазин", x = 19, y = 5, width = 24, height = 3, action = function() toGui("shop") end},
@@ -1512,7 +1512,7 @@ buttons = {
     nextBuy = {buttonIn = {"buy"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() buttons.purchase.disabled = true item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("buyItem", {item = item}) guiVariables[guiPath[#guiPath]].amount = 0 end},
     nextSell = {buttonIn = {"sell"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("sellItem", {item = item}) end},
     freeFood = {buttonIn = {"other"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Бесплатная еда", x = 19, y = 8, width = 24, height = 3, action = function() toGui("freeFood") nextFood() end},
-    lottery = {buttonIn = {"other"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Лотерея", x = 19, y = 12, width = 24, height = 3, action = function() toGui("lottery") end},
+    lottery = {buttonIn = {"other"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Лотерея", x = 19, y = 12, width = 24, height = 3, action = function() toGui("lottery") end},
     alert = {buttonIn = {"alert"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "Назад", x = 26, y = 15, width = 9, height = 1, action = function() back() end},
 
     zero = {buttonIn = {"buyItem"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "0", x = 29, y = 15, width = 3, height = 1, action = function() inputWrite("amount", 48) end},
@@ -1811,7 +1811,7 @@ while true do
                     session.transactions = session.transactions + 1
                     local response = requestWithData({data = msgToLog, mPath = "/sell.log", path = server .. "/sell"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name}) 
                     if response and response.code == 200 then
-                        setColorText(nil, 14, "[0x68f029]Баланс успешно пополнен на [0xffffff]" .. math.floor(addMoney) .. " [0x68f029] рипов!", color.background)
+                        setColorText(nil, 14, "[0x68f029]Баланс успешно пополнен на [0xffffff]" .. math.floor(addMoney) .. " [0x68f029] эмов!", color.background)
                         balance(1)
                         scanMe()
                         fill(1, 14, 60, 1, " ", color.background)
