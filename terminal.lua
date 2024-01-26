@@ -856,7 +856,7 @@ end
 
 local function balance(y, account)
     fill(1, 1, 60, 1, " ", color.background)
-    setColorText(nil, y, "[0x68f029]Баланс: [0xffffff]" .. math.floor(session.balance) .. " R.I.P", color.background)
+    setColorText(nil, y, "[0x68f029]Баланс: [0xffffff]" .. session.balance .. " R.I.P", color.background)
 end
 
 local function purchase()
@@ -867,7 +867,7 @@ local function purchase()
         local purchased = autoInsert(guiVariables[guiPath[#guiPath]].item.fingerprint, count)
 
         if purchased > 0 then
-            local trueAmount = math.floor(purchased * guiVariables[guiPath[#guiPath]].item.buyPrice)
+            local trueAmount = purchased * guiVariables[guiPath[#guiPath]].item.buyPrice
             local msgToLog = session.name .. " buy the (" .. purchased .. " qty in the amount of " .. trueAmount .. " rip) " .. guiVariables[guiPath[#guiPath]].item.text
             log(msgToLog, session.name)
             session.balance = session.balance - trueAmount
@@ -1426,7 +1426,7 @@ function login(name)
             buttons.feedbacks.disabled = false
             buttons.shop.disabled = false
             buttons.freeFood.disabled = false
-            buttons.lottery.disabled = false
+            buttons.lottery.disabled = true
         end
         selector.setSlot(1)
         back(#guiPath)
