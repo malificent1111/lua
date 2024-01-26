@@ -1,6 +1,6 @@
 {
     shop = {
-        {text = "Деньги", sellPrice = 1, buyPrice = 1, minCount = 1, maxCount = 1024, fingerprint = {{dmg=0.0,id="customnpcs:npcMoney"}}, raw_name = {"item.npcmoney"}},
+        {text = "Деньги" sellPrice = 1, buyPrice = 1, minCount = 1, maxCount = 1024, fingerprint = {{dmg=0.0,id="customnpcs:npcMoney"}}, raw_name = {"item.npcmoney"}},
         {text = "Малахит", sellPrice = 30, minCount = 1, maxCount = 1024, fingerprint = {{dmg=0.0,id="dwcity:Malahit"}}, raw_name = {"dwcity:Malahit"}},
 
         --vanilla
@@ -96,6 +96,20 @@
         {text="Релокатор", minCount=1,buyPrice="300",maxCount="3",fingerprint={{id="GraviSuite:relocator",dmg=1.0}}, raw_name={"item.relocator"}, ignoreDamage = true},
         {text="Улучшенный алм. бур", minCount=1,buyPrice="50",maxCount="4",fingerprint={{id="GraviSuite:advDDrill",dmg=0.0}}, raw_name={"item.advddrill"}, ignoreDamage = true},
         {text="Гравитационный жилет", minCount=1,buyPrice="700",maxCount="3",fingerprint={{id="GraviSuite:graviChestPlate",dmg=0.0}},raw_name={"item.gravichestplate"}, ignoreDamage = true},
+        {text = "Компрессор", buyPrice = 4, minCount = 1, maxCount = 4, fingerprint = {{dmg=5.0,id="IC2:blockMachine"}}, raw_name = {"ic2.blockcompressor"}},
+        {text = "Электропечь", buyPrice = 3, minCount = 1, maxCount = 4, fingerprint = {{dmg=2.0,id="IC2:blockMachine"}}, raw_name = {"ic2.blockelecfurnace"}},
+        {text = "Дробитель", buyPrice = 4, minCount = 1, maxCount = 4, fingerprint = {{dmg=3.0,id="IC2:blockMachine"}}, raw_name = {"ic2.blockmacerator"}},
+        {text = "Рудопромывочный механизм", buyPrice = 5, minCount = 1, maxCount = 4, fingerprint = {{dmg=5.0,id="IC2:blockMachine2"}}, raw_name = {"ic2.blockorewashingplant"}},
+        {text = "Термальная центрифуга", buyPrice = 8, minCount = 1, maxCount = 4, fingerprint = {{dmg=3.0,id="IC2:blockMachine2"}}, raw_name = {"ic2.blockcentrifuge"}},
+        {text = "Металлоформовочный механизм", buyPrice = 5, minCount = 1, maxCount = 8, fingerprint = {{dmg=4.0,id="IC2:blockMachine2"}}, raw_name = {"ic2.blockmetalformer"}},
+        {text = "Экстрактор", buyPrice = 4, minCount = 1, maxCount = 4, fingerprint = {{dmg=4.0,id="IC2:blockMachine"}}, raw_name = {"ic2.blockextractor"}},
+        {text = "Квантовый компрессор", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=3.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedcompressor"}},
+        {text = "Квантовая печь", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=0.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedfurnace"}},
+        {text = "Квантовый дробитель", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=1.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedmacerator"}},
+        {text = "Квантовый рудопромыв. мех.", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=6.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedorewashing"}},
+        {text = "Квантовая термал. центриф.", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=4.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedcentrifuge"}},
+        {text = "Квантовый металлоформ. мех.", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=5.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedmetalformer"}},
+        {text = "Квантовый экстрактор", buyPrice = 70, minCount = 1, maxCount = 2, fingerprint = {{dmg=2.0,id="dwcity:AdvancedMachine"}}, raw_name = {"dw.blockadvancedextractor"}},
 
         {text = "Нано-сабля", buyPrice = 1500, minCount = 0, maxCount = 512, ignoreDamage = true, fingerprint = {{dmg=1.0,id="IC2:itemNanoSaber"}}, raw_name = {"ic2.itemnanosaber"}},
         {text = "Нано-шлем", buyPrice = 2000, minCount = 0, maxCount = 512, ignoreDamage = true, fingerprint = {{dmg=0.0,id="IC2:itemArmorNanoHelmet"}}, raw_name = {"ic2.itemarmornanohelmet"}},
@@ -118,8 +132,8 @@
         {text = "Энтропийный кристалл", buyPrice = 0.05, minCount = 1, maxCount = 128, fingerprint = {{dmg=5.0,id="Thaumcraft:ItemShard"}}, raw_name = {"item.itemshard.5"}},
         {text = "Сбалансированный кристалл", buyPrice = 0.3, minCount = 1, maxCount = 128, fingerprint = {{dmg=6.0,id="Thaumcraft:ItemShard"}}, raw_name = {"item.itemshard.6"}},
         {text = "Ихор", buyPrice = 12, minCount = 1, maxCount = 32, fingerprint = {{dmg=0.0,id="ThaumicTinkerer:kamiResource"}}, raw_name = {"item.kamiresource"}},
-        {text = "Зараженное щупальце", buyPrice = 0.4, minCount = 1, maxCount = 1024, fingerprint = {{dmg=12.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.12"}},
-        {text = "Зараженная слизь", buyPrice = 0.4, minCount = 1, maxCount = 512, fingerprint = {{dmg=11.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.11"}},
+        {text = "Зараженное щупальце", buyPrice = 0.5, minCount = 1, maxCount = 1024, fingerprint = {{dmg=12.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.12"}},
+        {text = "Зараженная слизь", buyPrice = 0.5, minCount = 1, maxCount = 512, fingerprint = {{dmg=11.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.11"}},
         {text = "Мозг зомби", buyPrice = 0.2, minCount = 1, maxCount = 512, fingerprint = {{dmg=0.0,id="Thaumcraft:ItemZombieBrain"}}, raw_name = {"item.itemzombiebrain"}},
         {text = "Кристалл края", buyPrice = 2, minCount = 1, maxCount = 32, fingerprint = {{dmg=7.0,id="ThaumicTinkerer:kamiResource"}}, raw_name = {"item.kamiresource"}},
         {text = "Кристалл нижнего мира", buyPrice = 2, minCount = 1, maxCount = 32, fingerprint = {{dmg=6.0,id="ThaumicTinkerer:kamiResource"}}, raw_name = {"item.kamiresource"}},
