@@ -25,12 +25,12 @@ local freeFoodCount = 16
 
 local INFO = [[
 [0x68f029]1. [0xffffff]Что это такое? Ответ — Это магазин/обменник. Как угодно.
-[0x68f029]2. [0xffffff]Что такое R.I.P? Ответ — это вымышленная валюта. Это не серверная валюта!
-[0x68f029]3. [0xffffff]Как обменять товар на рипы? Ответ — нужно выбрать товар  и выбрать режим поиска предметов.
-[0x68f029]4. [0xffffff]Как купить товар? Ответ — выбираете товар, набираете кол-во товара, и товар будет добавлен в ваш инвентарь. Если денег недостаточно - товар нельзя купить.
-[0x68f029]5. [0xffffff]Как обменять руду? Выбираете режим поиска предметов, и руда будет обменена на слитки.
-[0x68f029]6. [0xffffff]Что за режим поиска предметов? Ответ — нажимая на "1 слот" магазин ищет предмет в 1 слоте вашего инвентаря. Внимание! "Весь инвентарь" — означает что ВЕСЬ ваш инвентарь будет просканирован. Любой предмет выбранный вами(Допустим — алмаз) будет продан из всех слотов!
-[0x68f029]7. [0xffffff]Что будет, если я продам зачарованный(переименованный, заряженный, и т.д) меч/гравик/нано-трусы? Ответ — цена таких вещей равняется стандартному предмету. Будьте внимательны!
+[0x68f029]2. [0xffffff]Что такое Emeralds? Ответ — это валюта сервера.
+[0x68f029]3. [0xffffff]Как пополнить баланс? Ответ - купите деньги в сундуке рядом, продайте их в аппарате и пополните свой баланс.
+[0x68f029]4. [0xffffff]Как обменять товар на эмы? Ответ — нужно выбрать товар  и выбрать режим поиска предметов.
+[0x68f029]5. [0xffffff]Как купить товар? Ответ — выбираете товар, набираете кол-во товара, жмете "Купить" и товар будет добавлен в ваш инвентарь. Если денег недостаточно - товар нельзя купить.
+[0x68f029]6. [0xffffff]Как обменять руду? Выбираете режим поиска предметов, и руда будет обменена на слитки.
+[0x68f029]7. [0xffffff]Что за режим поиска предметов? Ответ — нажимая на "1 слот" магазин ищет предмет в 1 слоте вашего инвентаря. Внимание! "Весь инвентарь" — означает что ВЕСЬ ваш инвентарь будет просканирован.
 ]]
 
 local pim, me, selector, tmpfs, modem = proxy("pim"), proxy("me_interface"), proxy("openperipheral_selector"), component.proxy(computer.tmpAddress())
@@ -164,7 +164,7 @@ local function drawPim()
 end
 
 local function discord()
-    setColorText(6, 18, "[0x303030]По любым проблемам пишите в Discord: [0x337d11]BrightYC#0604", color.background)
+    setColorText(6, 18, "[0x303030]По любым проблемам пишите: [0x337d11]Doggernaut, tarcassum", color.background)
 end
 
 local function outOfService(reason)
@@ -1498,7 +1498,7 @@ end
 
 buttons = {
     --Кнопки, которые отвечаю за перемещение по менюшкам
-    back = {buttonIn = {"shop", "buyItem", "sellItem", "other", "ore", "freeFood", "lottery", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
+    back = {buttonIn = {"shop", "buyItem", "sellItem", "other", "ore", "freeFood", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
     backShop = {buttonIn = {"buy", "sell"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 31, y = 18, width = 11, height = 1, action = function() back() end},
     eula = {buttonIn = {"info"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Я прочитал и соглашаюсь со всем  ", x = 13, y = 18, width = 35, height = 1, action = function() session.eula = true buttons.eula.notVisible = true buttons.back.notVisible = false requestWithData(nil, {method = "merge", toMerge = {eula = true}, name = session.name}) toGui("main") end},
     shop = {buttonIn = {"main"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Магазин", x = 19, y = 5, width = 24, height = 3, action = function() toGui("shop") end},
