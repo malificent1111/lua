@@ -1434,7 +1434,7 @@ function login(name)
 
         if active then
             clear()
-            setColorText(18, 2, "[0xffffff]Приветствуем в [0x68f029]РипМаркете[0xffffff]!", color.background)
+            setColorText(18, 2, "[0xffffff]Приветствуем на варпе [0x68f029]abc[0xffffff]!", color.background)
             setColorText(17, 5, "[0xffffff]Встаньте на [0x46c8e3]PIM[0xffffff], чтобы войти", color.background)
             discord()
             drawPim()
