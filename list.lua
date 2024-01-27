@@ -1,6 +1,6 @@
 {
     shop = {
-        {text = "Деньги", sellPrice = 1, buyPrice = 1, minCount = 0, maxCount = 1024, fingerprint = {{dmg=0.0,id="customnpcs:npcMoney"}}, raw_name = {"item.npcmoney"}},
+        {text = "Деньги" sellPrice = 1, buyPrice = 1, minCount = 0, maxCount = 1024, fingerprint = {{dmg=0.0,id="customnpcs:npcMoney"}}, raw_name = {"item.npcmoney"}},
         {text = "Малахит", sellPrice = 30, minCount = 0, maxCount = 1024, fingerprint = {{dmg=0.0,id="dwcity:Malahit"}}, raw_name = {"dwcity:Malahit"}},
 
         --vanilla
@@ -16,7 +16,6 @@
         {text = "Жемчуг эндера", buyPrice = 0.4, minCount = 0, maxCount = 1024, fingerprint = {{id="minecraft:ender_pearl",dmg=0.0}}, raw_name = {"item.enderpearl"}},
         {text = "Череп скелета", buyPrice = 0.2, minCount = 0, maxCount = 256, fingerprint = {{id="minecraft:skull",dmg=0.0}}, raw_name = {"item.skull.skeleton"}},
         {text = "Голова зомби", buyPrice = 0.2, minCount = 0, maxCount = 256, fingerprint = {{id="minecraft:skull",dmg=2.0}}, raw_name = {"item.skull.zombie"}},
-        {text = "Череп Скелета-Иссушителя", buyPrice = 30, minCount = 0, needed = 128, maxCount = 128, fingerprint = {{dmg=1.0,id="minecraft:skull"}}, raw_name = {"item.skull.wither"}},
         {text = "Перо", buyPrice = 0.05, minCount = 0, maxCount = 1024, fingerprint = {{dmg=0.0,id="minecraft:feather"}}, raw_name = {"item.feather"}},
         {text = "Стержень ифрита", buyPrice = 0.5, minCount = 0, maxCount = 512, fingerprint = {{id="minecraft:blaze_rod",dmg=0.0}}, raw_name = {"item.blazerod"}},
         {text = "Сгусток слизи", buyPrice = 0.5, minCount = 0, maxCount = 512, fingerprint = {{id="minecraft:slime_ball",dmg=0.0}}, raw_name = {"item.slimeball"}},
@@ -27,9 +26,12 @@
         {text = "Сырая рыба", buyPrice = 0.1, minCount = 0, maxCount = 1024, fingerprint = {{id="minecraft:fish",dmg=0.0}}, raw_name = {"item.fish.cod.raw"}},
         {text = "Яйцо", buyPrice = 0.1, minCount = 0, maxCount = 1024, fingerprint = {{id="minecraft:egg",dmg=0.0}}, raw_name = {"item.egg"}},
         {text = "Сахарный тростник", buyPrice = 0.01, minCount = 0, maxCount = 2048, fingerprint = {{id="minecraft:reeds",dmg=0.0}}, raw_name = {"item.reeds"}},
+        {text = "Череп Скелета-Иссушителя", buyPrice = 30, minCount = 0, needed = 128, maxCount = 128, fingerprint = {{dmg=1.0,id="minecraft:skull"}}, raw_name = {"item.skull.wither"}},
+
 
         --ae2
         {text = "Кристалл истинного кварца", buyPrice = 0.2, minCount = 0, maxCount = 2048, fingerprint = {{dmg=0.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystal"}},
+        {text = "Череп Скелета-Иссушителя", buyPrice = 30, minCount = 0, needed = 128, maxCount = 128, fingerprint = {{dmg=1.0,id="minecraft:skull"}}, raw_name = {"item.skull.wither"}},
         {text = "Зар. кристалл ист. кварца", buyPrice = 0.5, minCount = 0, maxCount = 256, needed = 256, fingerprint = {{dmg=1.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystalcharged"}},
         {text = "Вычислительный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=13.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.calcprocessorpress"}},
         {text = "Инженерный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=14.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.engprocessorpress"}},
@@ -89,10 +91,10 @@
         {text = "Ускоритель", buyPrice = 11, minCount = 0, needed = 32, maxCount = 32, fingerprint = {{dmg=0.0,id="IC2:upgradeModule"}}, raw_name = {"ic2.overclockerupgrade"}},
         {text = "Композит", buyPrice = 0.5, minCount = 0, maxCount = 128, needed = 128, fingerprint = {{dmg=0.0,id="IC2:itemPartAlloy"}}, raw_name = {"ic2.itempartalloy"}},
         {text = "Капсула хладагента", buyPrice = 0.5, needed = 256, minCount = 0, maxCount = 256, fingerprint = {{dmg=9.0,id="IC2:itemCellEmpty"}}, raw_name = {"ic2.itemcellcoolant"}},
-        {text = "Солн. панель 1-го ур.", buyPrice = 1.5, needed = 1024, minCount = 0, maxCount = 2048, fingerprint = {{dmg=3.0,id="IC2:blockGenerator"}}, raw_name = {"ic2.blocksolargenerator"}},
-        {text = "Солн. панель 2-го ур.", buyPrice = 12, needed = 512, minCount = 0, maxCount = 512, fingerprint = {{dmg=0.0,id="CompactSolar:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.lv_block"}},
-        {text = "Солн. панель 3-го ур.", buyPrice = 100, needed = 64, minCount = 0, maxCount = 64, fingerprint = {{dmg=1.0,id="CompactSolar:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.mv_block"}},
-        {text = "Солн. панель 4-го ур.", buyPrice = 800, needed = 4, minCount = 0, maxCount = 4, fingerprint = {{dmg=2.0,id="CompactSolar:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.hv_block"}},
+        {text = "Солн. панель 1-го ур.", buyPrice = 1.5, minCount = 0, maxCount = 2048, fingerprint = {{dmg=3.0,id="IC2:blockGenerator"}}, raw_name = {"ic2.blocksolargenerator"}},
+        {text = "Солн. панель 2-го ур.", buyPrice = 12, needed = 512, minCount = 0, maxCount = 512, fingerprint = {{dmg=0.0,id="CompactSolars:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.lv_block"}},
+        {text = "Солн. панель 3-го ур.", buyPrice = 100, needed = 64, minCount = 0, maxCount = 64, fingerprint = {{dmg=1.0,id="CompactSolars:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.mv_block"}},
+        {text = "Солн. панель 4-го ур.", buyPrice = 800, needed = 4, minCount = 0, maxCount = 4, fingerprint = {{dmg=2.0,id="CompactSolars:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.hv_block"}},
         {text = "Сверхпроводник", buyPrice = 55, minCount = 0, needed = 6, maxCount = 6, fingerprint = {{dmg=1.0,id="GraviSuite:itemSimpleItem"}}, raw_name = {"item.superconductor"}},
         {text="Релокатор", minCount=0,buyPrice="300",maxCount="3",fingerprint={{id="GraviSuite:relocator",dmg=1.0}}, raw_name={"item.relocator"}, ignoreDamage = true},
         {text="Улучшенный алм. бур", minCount=0,buyPrice="50",maxCount="4",fingerprint={{id="GraviSuite:advDDrill",dmg=0.0}}, raw_name={"item.advddrill"}, ignoreDamage = true},
@@ -124,7 +126,7 @@
 
         --thaumcraft
         {text = "Семя пустоты", buyPrice = 0.1, minCount = 0, maxCount = 16, fingerprint = {{dmg=17.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.17"}},
-        {text = "Нитор", buyPrice = 0.1, minCount = 0, maxCount = 32, fingerprint = {{dmg=1.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.1"}},
+        {text = "Нитор", buyPrice = 0.1, minCount = 0, maxCount = 32, needed=32, fingerprint = {{dmg=1.0,id="Thaumcraft:ItemResource"}}, raw_name = {"item.itemresource.1"}},
         {text = "Грозовой кристалл", buyPrice = 0.05, minCount = 0, maxCount = 128, fingerprint = {{dmg=0.0,id="Thaumcraft:ItemShard"}}, raw_name = {"item.itemshard.0"}},
         {text = "Огненный кристалл", buyPrice = 0.05, minCount = 0, maxCount = 128, fingerprint = {{dmg=1.0,id="Thaumcraft:ItemShard"}}, raw_name = {"item.itemshard.1"}},
         {text = "Ледяной кристалл", buyPrice = 0.05, minCount = 0, maxCount = 128, fingerprint = {{dmg=2.0,id="Thaumcraft:ItemShard"}}, raw_name = {"item.itemshard.2"}},
