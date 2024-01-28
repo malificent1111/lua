@@ -1400,6 +1400,7 @@ function login(name)
                     buttons.feedbacks.disabled = true
                     buttons.shop.disabled = true
                     buttons.freeFood.disabled = true
+                    buttons.returnMoney.disabled = true
                     --buttons.lottery.disabled = true
                     scanMe()
                     toGui("main")
@@ -1424,6 +1425,7 @@ function login(name)
             buttons.feedbacks.disabled = false
             buttons.shop.disabled = false
             buttons.freeFood.disabled = false
+            buttons.returnMoney.disabled = false
             --buttons.lottery.disabled = false
         end
         selector.setSlot(1)
@@ -1494,6 +1496,10 @@ local function initWrites()
     end
 end
 
+local function returnMoney()
+
+end
+
 buttons = {
     --Кнопки, которые отвечаю за перемещение по менюшкам : были удалены "other", "lottery"
     back = {buttonIn = {"shop", "buyItem", "sellItem", "ore", "freeFood", "account", "info", "feedbacks", "shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "   Назад   ", x = 25, y = 18, width = 11, height = 1, action = function() back() end},
@@ -1511,6 +1517,7 @@ buttons = {
     nextSell = {buttonIn = {"sell"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("sellItem", {item = item}) end},
     freeFood = {buttonIn = {"other"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Бесплатная еда", x = 19, y = 8, width = 24, height = 3, action = function() toGui("freeFood") nextFood() end},
     --lottery = {buttonIn = {"other"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Лотерея", x = 19, y = 12, width = 24, height = 3, action = function() toGui("lottery") end},
+    returnMoney = {buttonIn = {"shop"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Вернуть деньги", x = 19, y = 12, width = 24, height = 3, action = function() toGui("returnMoney") end},
     alert = {buttonIn = {"alert"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "Назад", x = 26, y = 15, width = 9, height = 1, action = function() back() end},
 
     zero = {buttonIn = {"buyItem"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "0", x = 29, y = 15, width = 3, height = 1, action = function() inputWrite("amount", 48) end},
