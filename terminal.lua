@@ -1504,16 +1504,17 @@ local function returnMoney()
     moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
     if session.balance > 1 then
         toReturn = math.floor(session.balance)
+
+        totalGived = 0
+
+        while totalGived < toReturn do
+            gived = me.exportItem(moneyFingerprint, "UP", toReturn, 0).size
+            totalGived = totalGived + gived
+        end
+
+        session.balance = session.balance - totalGived
     end
 
-    totalGived = 0
-
-    while gived < toReturn do
-        gived = me.exportItem(moneyFingerprint, "UP", toReturn, 0).size
-        totalGived = totalGived + gived
-    end
-
-    session.balance = session.balance - totalGived
 
 end
 
