@@ -1513,6 +1513,8 @@ local function returnMoney()
         end
 
         session.balance = session.balance - totalGived
+        local msgToLog = session.name .. " took " .. totalGived .. "emeralds"
+        requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
 
 
