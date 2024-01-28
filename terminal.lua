@@ -1503,11 +1503,12 @@ local function returnMoney()
     moneyId = {dmg=0.0,id="customnpcs:npcMoney"}
     moneyQty = me.getItemDetail(moneyId).basic().qty
     if session.balance > 1 then
-        toReturn = math.floor(session.balance - 0.5)
+        toReturn = math.floor(session.balance)
     end
 
-    me.exportItem(moneyId, "UP", toReturn, 0)
+    gived = me.exportItem(moneyId, "UP", toReturn, 0).size
 
+    session.balance = session.balance - gived
 end
 
 buttons = {
