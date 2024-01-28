@@ -1502,8 +1502,8 @@ end
 local function returnMoney()
     moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
     moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
-    if session.balance > 1 then
-        toReturn = math.floor(session.balance)
+    if session.balance >= 1 then
+        toReturn = session.balance - (session.balance % 1)
 
         totalGived = 0
 
