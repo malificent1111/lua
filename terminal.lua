@@ -1500,7 +1500,8 @@ end
 
 --function to edit
 local function returnMoney()
-
+    toReturn = math.floor(session.balance - 0.5)
+    gived = me.exportItem({dmg=0.0,id="customnpcs:npcMoney"}, "UP", 20, 0).size
 end
 
 buttons = {
@@ -1514,13 +1515,13 @@ buttons = {
     account = {buttonIn = {"main"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Аккаунт", x = 19, y = 9, width = 24, height = 3, action = function() toGui("account") end},
     feedbacks = {buttonIn = {"main"}, disabledBackground = color.background, disabledForeground = color.blackLime, background = color.background, activeBackground = color.background, foreground = color.lime, activeForeground = color.blackLime, text = "[Отзывы]", x = 53, y = 19, width = 8, height = 1, action = function() toGui("feedbacks") end},
     info = {buttonIn = {"main"}, disabledBackground = color.background, disabledForeground = color.blackLime, background = color.background, activeBackground = color.background, foreground = color.lime, activeForeground = color.blackLime, text = "[Помощь]", x = 1, y = 19, width = 8, height = 1, action = function() toGui("info") end},
-    buy = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Покупка", x = 19, y = 6,  width = 24, height = 3, action = function() toGui("buy") end},
-    sell = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Пополнить баланс", x = 19, y = 10, width = 24, height = 3, action = function() toGui("sell") end},
+    buy = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Покупка", x = 19, y = 5,  width = 24, height = 3, action = function() toGui("buy") end},
+    sell = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Пополнить баланс", x = 19, y = 9, width = 24, height = 3, action = function() toGui("sell") end},
     nextBuy = {buttonIn = {"buy"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() buttons.purchase.disabled = true item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("buyItem", {item = item}) guiVariables[guiPath[#guiPath]].amount = 0 end},
     nextSell = {buttonIn = {"sell"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("sellItem", {item = item}) end},
     freeFood = {buttonIn = {"other"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Бесплатная еда", x = 19, y = 8, width = 24, height = 3, action = function() toGui("freeFood") nextFood() end},
     --lottery = {buttonIn = {"other"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Лотерея", x = 19, y = 12, width = 24, height = 3, action = function() toGui("lottery") end},
-    returnMoney = {buttonIn = {"shop"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Вернуть деньги", x = 19, y = 12, width = 24, height = 3, action = function() toGui("returnMoney") end},
+    returnMoney = {buttonIn = {"shop"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Вернуть деньги", x = 19, y = 13, width = 24, height = 3, action = returnMoney()},
     alert = {buttonIn = {"alert"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "Назад", x = 26, y = 15, width = 9, height = 1, action = function() back() end},
 
     zero = {buttonIn = {"buyItem"}, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "0", x = 29, y = 15, width = 3, height = 1, action = function() inputWrite("amount", 48) end},
