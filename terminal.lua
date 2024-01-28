@@ -1503,7 +1503,7 @@ local function returnMoney()
     moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
     moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
     if session.balance >= 1 then
-        toReturn = session.balance - (session.balance % 1)
+        toReturn = math.modf(session.balance)
 
         totalGived = 0
 
@@ -1512,8 +1512,10 @@ local function returnMoney()
             totalGived = totalGived + gived
         end
 
+        totalGived = math.modf(totalGived)
+
         session.balance = session.balance - totalGived
-        local msgToLog = session.name .. " took " .. totalGived .. "emeralds"
+        local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
         requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
 
