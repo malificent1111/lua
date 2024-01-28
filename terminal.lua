@@ -1500,15 +1500,21 @@ end
 
 --function to edit
 local function returnMoney()
-    moneyId = {dmg=0.0,id="customnpcs:npcMoney"}
+    moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
     moneyQty = me.getItemDetail(moneyId).basic().qty
     if session.balance > 1 then
         toReturn = math.floor(session.balance)
     end
 
-    gived = me.exportItem(moneyId, "UP", toReturn, 0).size
+    totalGived = 0
 
-    session.balance = session.balance - gived
+    while gived < toReturn do
+        gived = me.exportItem(moneyFingerprint, "UP", toReturn, 0).size
+        totalGived = totalGived + gived
+    end
+
+    session.balance = session.balance - totalGived
+
 end
 
 buttons = {
