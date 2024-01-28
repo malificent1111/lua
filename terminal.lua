@@ -1497,6 +1497,8 @@ local function initWrites()
     end
 end
 
+
+--function to edit
 local function returnMoney()
 
 end
