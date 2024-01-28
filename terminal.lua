@@ -1500,8 +1500,14 @@ end
 
 --function to edit
 local function returnMoney()
-    toReturn = math.floor(session.balance - 0.5)
-    gived = me.exportItem({dmg=0.0,id="customnpcs:npcMoney"}, "UP", 20, 0).size
+    moneyId = {dmg=0.0,id="customnpcs:npcMoney"}
+    moneyQty = me.getItemDetail(moneyId).basic().qty
+    if session.balance > 1 then
+        toReturn = math.floor(session.balance - 0.5)
+    end
+
+    me.exportItem(moneyId, "UP", toReturn, 0)
+
 end
 
 buttons = {
