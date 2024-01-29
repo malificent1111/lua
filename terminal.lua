@@ -883,6 +883,31 @@ local function purchase()
     end
 end
 
+local function returnMoney()
+    local moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
+    local moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
+
+    local toReturn = math.floor(session.balance)
+
+    if toReturn >= 1 and moneyQty >= toReturn then
+        local totalGived = 0
+
+        while totalGived < toReturn do
+            local gived = me.exportItem(moneyFingerprint, "UP", toReturn, 0).size
+            totalGived = totalGived + gived
+        end
+
+        totalGived = math.floor(totalGived)
+        local msgToLog = session.balance .. " - " .. totalGived .. " = " .. session.balance - totalGived
+        session.balance = session.balance - totalGived
+        --local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
+
+        requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
+    end
+
+
+end
+
 local function amount(key, force)
     if key and key == "C" then
         writes.amount.input = ""
@@ -1498,29 +1523,7 @@ local function initWrites()
 end
 
 
---function to edit
-local function returnMoney()
-    moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
-    moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
-    if session.balance >= 1 then
-        toReturn = math.floor(session.balance)
 
-        totalGived = 0
-
-        while totalGived < toReturn do
-            gived = me.exportItem(moneyFingerprint, "UP", toReturn, 0).size
-            totalGived = totalGived + gived
-        end
-
-        totalGived = math.floor(totalGived)
-
-        session.balance = session.balance - totalGived
-        local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
-        requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
-    end
-
-
-end
 
 buttons = {
     --Кнопки, которые отвечаю за перемещение по менюшкам : были удалены "other", "lottery"
