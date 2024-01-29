@@ -893,11 +893,10 @@ local function returnMoney()
         local totalGived = 0
 
         while totalGived < toReturn do
-            local gived = me.exportItem(moneyFingerprint, "UP", toReturn, 0).size
+            local gived = me.exportItem(moneyFingerprint, "UP", toReturn-totalGived, 0).size
             totalGived = totalGived + gived
         end
 
-        totalGived = math.floor(totalGived)
         local msgToLog = session.balance .. " - " .. totalGived .. " = " .. session.balance - totalGived
         session.balance = session.balance - totalGived
         --local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
