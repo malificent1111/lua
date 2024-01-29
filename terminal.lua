@@ -1286,22 +1286,22 @@ end
 
 function alert(text, func)
     local screen = {}
-    for y = 5, 11 do
+    for y = 1, 7 do
         screen[y] = {}
 
         for x = 10, 52 do
             screen[y][x] = {gpu.get(x, y)}
         end
     end
-    fill(10, 5, 42, 11, " ", color.gray)
-    set(17, 5, "Подтвердите для продолжения", color.gray, 0xffffff)
-    set(10, 11, screen[11][10][1], screen[11][10][3], screen[11][10][2])
-    set(11, 11, screen[11][11][1], screen[11][11][3], screen[11][11][2])
-    set(50, 11, screen[11][50][1], screen[11][50][3], screen[11][50][2])
-    set(51, 11, screen[11][51][1], screen[11][51][3], screen[11][51][2])
-    set(42, 10, "  OK  ", color.blue, 0xffffff)
+    fill(10, 1, 42, 7, " ", color.gray)
+    set(17, 1, "Подтвердите для продолжения", color.gray, 0xffffff)
+    set(10, 7, screen[7][10][1], screen[7][10][3], screen[7][10][2])
+    set(11, 7, screen[7][11][1], screen[7][11][3], screen[7][11][2])
+    set(50, 7, screen[7][50][1], screen[7][50][3], screen[7][50][2])
+    set(51, 7, screen[7][51][1], screen[7][51][3], screen[7][51][2])
+    set(42, 6, "  OK  ", color.blue, 0xffffff)
 
-    for str = 5, #text do
+    for str = 1, #text do
         set(nil, str + 2, text[str], color.gray, 0xffffff)
     end
 
@@ -1310,8 +1310,8 @@ function alert(text, func)
 
         if signal then
             if signal[1] == "touch" then
-                if signal[3] >= 42 and signal[3] <= 47 and signal[4] == 10 then
-                    set(42, 10, "  OK  ", color.blackBlue, color.gray)
+                if signal[3] >= 42 and signal[3] <= 47 and signal[4] == 6 then
+                    set(42, 6, "  OK  ", color.blackBlue, color.gray)
                     sleep(0.01)
                     if func then
                         func()
@@ -1324,7 +1324,7 @@ function alert(text, func)
         end
     end
 
-    for y = 5, 11 do 
+    for y = 1, 7 do 
         for x = 10, 52 do
             set(x, y, screen[y][x][1], screen[y][x][3], screen[y][x][2])
         end
