@@ -924,12 +924,16 @@ local function topUpBalance()
             end
         end
     end
-    totalTakenMoney = math.floor(totalTakenMoney)
-    session.balance = session.balance + totalTakenMoney
-    local msgToLog = session.name .. " topped up balance with " .. totalTakenMoney .. " emeralds"
+    if totalTakenMoney > 0 then
+        totalTakenMoney = math.floor(totalTakenMoney)
+        session.balance = session.balance + totalTakenMoney
 
-    alert({"Ваш счёт был пополнен"})
-    requestWithData({data = msgToLog, mPath = "/topUpBalance.log", path = server .. "/topUpBalance"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
+        alert({"Ваш счёт был пополнен"})
+        
+        local msgToLog = session.name .. " topped up balance with " .. totalTakenMoney .. " emeralds"
+        requestWithData({data = msgToLog, mPath = "/topUpBalance.log", path = server .. "/topUpBalance"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
+    end
+
 end
 
 local function amount(key, force)
