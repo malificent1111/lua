@@ -1293,7 +1293,7 @@ function alert(text, func)
             screen[y][x] = {gpu.get(x, y)}
         end
     end
-    fill(10, 5, 42, 12, " ", color.gray)
+    fill(10, 5, 42, 11, " ", color.gray)
     set(17, 5, "Подтвердите для продолжения", color.gray, 0xffffff)
     set(10, 11, screen[11][10][1], screen[11][10][3], screen[11][10][2])
     set(11, 11, screen[11][11][1], screen[11][11][3], screen[11][11][2])
