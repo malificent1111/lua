@@ -910,6 +910,7 @@ local function returnMoney()
         alert({"Эмы были сняты со счёта"})
         requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
+    alert({"Недостаточно средств на счету"})
 end
 
 local function topUpBalance()
@@ -929,11 +930,10 @@ local function topUpBalance()
         session.balance = session.balance + totalTakenMoney
 
         alert({"Ваш счёт был пополнен"})
-        
         local msgToLog = session.name .. " topped up balance with " .. totalTakenMoney .. " emeralds"
         requestWithData({data = msgToLog, mPath = "/topUpBalance.log", path = server .. "/topUpBalance"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
-
+    alert({"Деньги не были найдены в инвентаре", "Вы можете купить деньги в сундуке рядом с магазином"})
 end
 
 local function amount(key, force)
@@ -1299,10 +1299,10 @@ function alert(text, func)
     end
     fill(10, 1, 42, 7, " ", color.gray)
     set(17, 1, "Подтвердите для продолжения", color.gray, 0xffffff)
-    set(10, 7, screen[7][10][1], screen[7][10][3], screen[7][10][2])
-    set(11, 7, screen[7][11][1], screen[7][11][3], screen[7][11][2])
-    set(50, 7, screen[7][50][1], screen[7][50][3], screen[7][50][2])
-    set(51, 7, screen[7][51][1], screen[7][51][3], screen[7][51][2])
+    --set(10, 7, screen[7][10][1], screen[7][10][3], screen[7][10][2])
+    --set(11, 7, screen[7][11][1], screen[7][11][3], screen[7][11][2])
+    --set(50, 7, screen[7][50][1], screen[7][50][3], screen[7][50][2])
+    --set(51, 7, screen[7][51][1], screen[7][51][3], screen[7][51][2])
     set(42, 6, "  OK  ", color.blue, 0xffffff)
 
     for str = 1, #text do
