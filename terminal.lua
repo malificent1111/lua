@@ -1502,9 +1502,8 @@ end
 local function returnMoney()
     moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
     moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
-    session.balance = response.userdata.balance[server]
     if session.balance >= 1 then
-        toReturn = math.modf(session.balance)
+        toReturn = math.floor(session.balance)
 
         totalGived = 0
 
@@ -1513,7 +1512,7 @@ local function returnMoney()
             totalGived = totalGived + gived
         end
 
-        totalGived = math.modf(totalGived)
+        totalGived = math.floor(totalGived)
 
         session.balance = session.balance - totalGived
         local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
@@ -1837,7 +1836,7 @@ while true do
                     log(msgToLog, session.name)
                     session.balance = session.balance + addMoney
                     session.transactions = session.transactions + 1
-                    local response = requestWithData({data = msgToLog, mPath = "/sell.log", path = server .. "/sell"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name}) 
+                    local response = requestWithData({data = msgToLog, mPath = "/sell.log", path = server .. "/sell"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
                     if response and response.code == 200 then
                         setColorText(nil, 14, "[0x68f029]Баланс успешно пополнен на [0xffffff]" .. math.floor(addMoney) .. " [0x68f029] эмов!", color.background)
                         balance(1)
