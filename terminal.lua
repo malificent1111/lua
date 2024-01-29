@@ -36,6 +36,7 @@ local pim, me, selector, tmpfs, modem = proxy("pim"), proxy("me_interface"), pro
 local json, serialization = require("json"), require("serialization")
 local terminal = computer.address()
 local key
+local moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
 
 local active = true
 local guiPage = 1 
@@ -884,7 +885,6 @@ local function purchase()
 end
 
 local function returnMoney()
-    local moneyFingerprint = {dmg=0.0,id="customnpcs:npcMoney"}
     local moneyQty = me.getItemDetail(moneyFingerprint).basic().qty
 
     local toReturn = math.floor(session.balance)
@@ -903,8 +903,25 @@ local function returnMoney()
 
         requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
+end
 
+local function topUpBalance()
+    local size = 36
+    local slot = pim.getAllStacks(0)
+    local totalTakenMoney = 0
+    for i = 1, size do
+        if slot[i] then
+            if slot[i].id == moneyFingerprint.id and slot[i].dmg == moneyFingerprint.dmg then
+                local takenMoney = pim.pushItem("DOWN", i, slot[i].qty)
+                totalTakenMoney = totalTakenMoney + math.floor(takenMoney)
+            end
+        end
+    end
+    totalTakenMoney = math.floor(totalTakenMoney)
+    session.balance = session.balance + totalTakenMoney
+    local msgToLog = session.name .. " topped up balance with " .. totalTakenMoney .. " emeralds"
 
+    requestWithData({data = msgToLog, mPath = "/topUpBalance.log", path = server .. "/topUpBalance"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
 end
 
 local function amount(key, force)
@@ -1536,7 +1553,7 @@ buttons = {
     feedbacks = {buttonIn = {"main"}, disabledBackground = color.background, disabledForeground = color.blackLime, background = color.background, activeBackground = color.background, foreground = color.lime, activeForeground = color.blackLime, text = "[Отзывы]", x = 53, y = 19, width = 8, height = 1, action = function() toGui("feedbacks") end},
     info = {buttonIn = {"main"}, disabledBackground = color.background, disabledForeground = color.blackLime, background = color.background, activeBackground = color.background, foreground = color.lime, activeForeground = color.blackLime, text = "[Помощь]", x = 1, y = 19, width = 8, height = 1, action = function() toGui("info") end},
     buy = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Покупка", x = 19, y = 5,  width = 24, height = 3, action = function() toGui("buy") end},
-    sell = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Пополнить баланс", x = 19, y = 9, width = 24, height = 3, action = function() toGui("sell") end},
+    sell = {buttonIn = {"shop"}, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Пополнить баланс", x = 19, y = 9, width = 24, height = 3, action = function() topUpBalance() end},
     nextBuy = {buttonIn = {"buy"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() buttons.purchase.disabled = true item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("buyItem", {item = item}) guiVariables[guiPath[#guiPath]].amount = 0 end},
     nextSell = {buttonIn = {"sell"}, disabled = true, disabledBackground = color.blackGray, disabledForeground = color.blackOrange, background = color.gray, activeBackground = color.blackGray, foreground = color.orange, activeForeground = color.blackOrange, text = "  Далее  ", x = 50, y = 18, width = 9, height = 1, action = function() item = items.shop[lists[focus.list].scrollContent[lists[focus.list].scrollContent.activeIndex].index] toGui("sellItem", {item = item}) end},
     freeFood = {buttonIn = {"other"}, disabledBackground = color.blackGray, disabledForeground = color.blackLime, background = color.gray, activeBackground = color.blackGray, foreground = color.lime, activeForeground = color.blackLime, text = "Бесплатная еда", x = 19, y = 8, width = 24, height = 3, action = function() toGui("freeFood") nextFood() end},
