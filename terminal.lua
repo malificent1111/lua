@@ -897,9 +897,9 @@ local function returnMoney()
             totalGived = totalGived + gived
         end
 
-        local msgToLog = session.balance .. " - " .. totalGived .. " = " .. session.balance - totalGived
         session.balance = session.balance - totalGived
-        --local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
+        session.balance = math.floor(session.balance * 100 + 0.05) / 100
+        local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
 
         requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
