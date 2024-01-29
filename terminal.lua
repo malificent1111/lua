@@ -870,7 +870,10 @@ local function purchase()
             local trueAmount = purchased * guiVariables[guiPath[#guiPath]].item.buyPrice
             local msgToLog = session.name .. " buy the (" .. purchased .. " qty in the amount of " .. trueAmount .. " rip) " .. guiVariables[guiPath[#guiPath]].item.text
             log(msgToLog, session.name)
-            session.balance = session.balance - trueAmount
+            local balanceDiff = session.balance - trueAmount
+            local roundBalanceDiff = string.format("%.2f", balanceDiff)
+            session.balance = (math.abs(tonumber(roundBalanceDiff)))
+            --session.balance = session.balance - trueAmount
             session.transactions = session.transactions + 1
             requestWithData({data = msgToLog, mPath = "/buy.log", path = server .. "/buy"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
         else
@@ -897,10 +900,14 @@ local function returnMoney()
             totalGived = totalGived + gived
         end
 
-        session.balance = session.balance - totalGived
-        session.balance = math.floor(session.balance * 100 + 0.05) / 100
+        local balanceDiff = session.balance - totalGived
+        local roundBalanceDiff = string.format("%.2f", balanceDiff)
+        session.balance = (math.abs(tonumber(roundBalanceDiff)))
+        --session.balance = session.balance - totalGived
+        --session.balance = math.floor(session.balance * 100 + 0.05) / 100
         local msgToLog = session.name .. " took " .. totalGived .. " emeralds"
 
+        alert({"Эмы были сняты со счёта"})
         requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
     end
 end
@@ -921,6 +928,7 @@ local function topUpBalance()
     session.balance = session.balance + totalTakenMoney
     local msgToLog = session.name .. " topped up balance with " .. totalTakenMoney .. " emeralds"
 
+    alert({"Ваш счёт был пополнен"})
     requestWithData({data = msgToLog, mPath = "/topUpBalance.log", path = server .. "/topUpBalance"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
 end
 
