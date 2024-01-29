@@ -909,8 +909,9 @@ local function returnMoney()
 
         alert({"Эмы были сняты со счёта"})
         requestWithData({data = msgToLog, mPath = "/returnedMoney.log", path = server .. "/returnedMoney"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
+    else
+        alert({"Недостаточно средств на счету"})
     end
-    alert({"Недостаточно средств на счету"})
 end
 
 local function topUpBalance()
@@ -932,8 +933,9 @@ local function topUpBalance()
         alert({"Ваш счёт был пополнен"})
         local msgToLog = session.name .. " topped up balance with " .. totalTakenMoney .. " emeralds"
         requestWithData({data = msgToLog, mPath = "/topUpBalance.log", path = server .. "/topUpBalance"}, {method = "merge", toMerge = {balance = {[server] = session.balance}, transactions = session.transactions}, name = session.name})
-    end
-    alert({"Деньги не были найдены в инвентаре", "Вы можете купить деньги в сундуке рядом с магазином"})
+    else
+        alert({"Деньги не были найдены в инвентаре", "Вы можете купить деньги", "в сундуке рядом с магазином"})
+    end    
 end
 
 local function amount(key, force)
