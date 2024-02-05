@@ -949,7 +949,6 @@ local function amount(key, force)
 
     if writes.amount.input ~= "" then
         guiVariables[guiPath[#guiPath]].amount = count * guiVariables[guiPath[#guiPath]].item.buyPrice
-        print(guiVariables[guiPath[#guiPath]].amount)
         set(12, 5, tostring(guiVariables[guiPath[#guiPath]].amount) .. "       ", color.background, guiVariables[guiPath[#guiPath]].amount <= session.balance and 0xffffff or color.red)
         if force then
             set(10, 7, writes.amount.input, color.background, 0xffffff)
