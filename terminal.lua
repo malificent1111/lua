@@ -862,7 +862,7 @@ end
 local function purchase()
     local count = tonumber(writes.amount.input)
 
-    if tostring(guiVariables[guiPath[#guiPath]].amount) <= tostring(session.balance) then
+    if guiVariables[guiPath[#guiPath]].amount <= session.balance then
         log("Init buy (" .. count .. " qty in the amount of " .. guiVariables[guiPath[#guiPath]].amount .. " rip) " .. guiVariables[guiPath[#guiPath]].item.text, session.name)
         local purchased = autoInsert(guiVariables[guiPath[#guiPath]].item.fingerprint, count)
 
@@ -949,7 +949,8 @@ local function amount(key, force)
 
     if writes.amount.input ~= "" then
         guiVariables[guiPath[#guiPath]].amount = count * guiVariables[guiPath[#guiPath]].item.buyPrice
-        set(12, 5, tostring(guiVariables[guiPath[#guiPath]].amount) .. "       ", color.background, tostring(guiVariables[guiPath[#guiPath]].amount) <= tostring(session.balance) and 0xffffff or color.red)
+        print(guiVariables[guiPath[#guiPath]].amount)
+        set(12, 5, tostring(guiVariables[guiPath[#guiPath]].amount) .. "       ", color.background, guiVariables[guiPath[#guiPath]].amount <= session.balance and 0xffffff or color.red)
         if force then
             set(10, 7, writes.amount.input, color.background, 0xffffff)
         end
@@ -958,7 +959,7 @@ local function amount(key, force)
         set(10, 7, "0", color.background, 0xffffff)
     end
 
-    if writes.amount.input ~= "" and tostring(guiVariables[guiPath[#guiPath]].amount) <= tostring(session.balance) and guiVariables[guiPath[#guiPath]].item.count >= count then
+    if writes.amount.input ~= "" and guiVariables[guiPath[#guiPath]].amount <= session.balance and guiVariables[guiPath[#guiPath]].item.count >= count then
         if buttons.purchase.disabled then
             buttons.purchase.disabled = false
             drawButton("purchase")
