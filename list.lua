@@ -71,7 +71,7 @@
         {text="МЭ конденсатор материи",maxCount="8", needed=8,fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockCondenser"}},minCount=0,raw_name={"tile.appliedenergistics2.blockcondenser"},buyPrice="0.6"},
         {text="МЭ терминал создания",maxCount="8", needed=8,fingerprint={{dmg=360.0,id="appliedenergistics2:item.ItemMultiPart"}},minCount=0,raw_name={"item.appliedenergistics2.itempart.craftingterminal"},buyPrice="1"},
         {text="Высекатель",maxCount="16",needed=16,fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockInscriber"}},minCount=0,raw_name={"tile.appliedenergistics2.blockinscriber"},buyPrice="1"},
-        {text="Продвинутый высекатель",maxCount="4",needed=4,fingerprint={{dmg=0.0,id="ae2stuff:Inscriber"}},minCount=0,raw_name={"tile.ae2stuff.inscriber"},buyPrice="80"},
+        {text="Продвинутый высекатель",maxCount="4",needed=4,fingerprint={{dmg=0.0,id="ae2stuff:Inscriber"}},minCount=0,raw_name={"tile.ae2stuff.inscriber"},buyPrice=80},
 
         --ic2
         {text = "Резина", buyPrice = 0.01, minCount = 0, maxCount = 1024, fingerprint = {{dmg=0.0,id="IC2:itemRubber"}}, raw_name = {"ic2.itemrubber"}},
