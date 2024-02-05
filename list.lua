@@ -58,7 +58,7 @@
         {text="МЭ терминал безопасности",maxCount=4, needed=4, fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockSecurity"}},minCount=0,raw_name={"tile.appliedenergistics2.blocksecurity"},buyPrice=25},
         {text="Пустой шаблон",maxCount=256, needed=256, fingerprint={{dmg=52.0,id="appliedenergistics2:item.ItemMultiMaterial"}},minCount=0,raw_name={"item.appliedenergistics2.itemmaterial.blankpattern"},buyPrice=0.7},
         {text="4К компонент хранения",maxCount=16, needed=16,fingerprint={{dmg=36.0,id="appliedenergistics2:item.ItemMultiMaterial"}},minCount=0,raw_name={"item.appliedenergistics2.itemmaterial.cell4kpart"},buyPrice=7},
-        {text="16К компонент хранения",maxCount=8, needed=8,fingerprint={{dmg=37.0,id="appliedenergistics2:item.ItemMultiMaterial"}},minCount=0,raw_name={"item.appliedenergistics2.itemmaterial.cell16kpart"},buyPrice=15},
+        {text="16К компонент хранения",maxCount=8, needed=8,fingerprint={{dmg=37.0,id="appliedenergistics2:item.ItemMultiMaterial"}},minCount=0,raw_name={"item.appliedenergistics2.itemmaterial.cell16kpart"},buyPrice="15"},
         {text="64К компонент хранения",maxCount=8, needed=8,fingerprint={{dmg=38.0,id="appliedenergistics2:item.ItemMultiMaterial"}},minCount=0,raw_name={"item.appliedenergistics2.itemmaterial.cell64kpart"},buyPrice=30},
         {text="МЭ контроллер",maxCount=128, needed=128,fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockController"}},minCount=0,raw_name={"tile.appliedenergistics2.blockcontroller"},buyPrice=1},
         {text="МЭ интерфейс",maxCount=64, needed=64,fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockInterface"}},minCount=0,raw_name={"tile.appliedenergistics2.blockinterface"},buyPrice=1},
