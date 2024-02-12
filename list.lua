@@ -280,6 +280,35 @@
         {text="Мистический красный лепесток",buyPrice=0.01,raw_name={"item.petal14"},minCount=1,fingerprint={{dmg=14.0,id="Botania:petal"}},maxCount=256},
         {text="Мистический чёрный лепесток",buyPrice=0.01,raw_name={"item.petal15"},minCount=1,fingerprint={{dmg=15.0,id="Botania:petal"}},maxCount=256},
 
+
+        --witchery
+        {maxCount=128,buyPrice=0.1,text="Цветок беладонны",fingerprint={{dmg=21.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.belladonna"}},
+        {maxCount=64,buyPrice=0.2,text="Цветок мандрагоры",fingerprint={{dmg=22.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.mandrakeroot"}},
+        {maxCount=32,buyPrice=0.3,text="Сверкающий сорняк",fingerprint={{dmg=0.0,id="witchery:glintweed"}},minCount=1,raw_name={"tile.witchery:glintweed"}},
+        {maxCount=16,buyPrice=0.2,text="Ольховый росток",fingerprint={{dmg=1.0,id="witchery:witchsapling"}},minCount=1,raw_name={"tile.witchery:witchsapling.alder"}},
+        {maxCount=128,buyPrice=0.1,text="Сосулька",fingerprint={{dmg=78.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.icyneedle"}},
+        {maxCount=32,buyPrice=0.2,text="Янтарный мох",fingerprint={{dmg=0.0,id="witchery:embermoss"}},minCount=1,raw_name={"tile.witchery:embermoss"}},
+        {maxCount=16,buyPrice=0.4,text="Шерсть летучей мыши",fingerprint={{dmg=24.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.batwool"}},
+        {maxCount=16,buyPrice=0.65,text="Камень силы (заряж.)",fingerprint={{dmg=11.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.attunedstonecharged"}},
+        {maxCount=4,buyPrice=2,text="Суп из Редстоуна",fingerprint={{dmg=40.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.redstonesoup"}},
+        {maxCount=8,buyPrice=0.3,text="Wolf Head",fingerprint={{dmg=0.0,id="witchery:wolfhead"}},minCount=1,raw_name={"tile.witchery:wolfhead.wolf"}},
+        {maxCount=128,buyPrice=0.5,text="Абсолютное зло",fingerprint={{dmg=38.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.refinedevil"}},
+        {maxCount=128,buyPrice=0.01,text="Клубень водного артишока",fingerprint={{dmg=69.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.artichoke"}},
+        {maxCount=32,buyPrice=0.05,text="Мутандис",fingerprint={{dmg=14.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.mutandis"}},
+        {maxCount=32,buyPrice=0.15,text="Мутандис Экстремис",fingerprint={{dmg=15.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.mutandisextremis"}},
+        {maxCount=32,buyPrice=0.1,text="Язык собаки",fingerprint={{dmg=25.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.dogtongue"}},
+        {maxCount=8,buyPrice=0.6,text="Мел потустороннего мира",fingerprint={{dmg=0.0,id="witchery:chalkotherwhere"}},minCount=1,raw_name={"item.witchery:chalkotherwhere"}},
+        {maxCount=32,buyPrice=0.2,text="Боярышниковый росток",fingerprint={{dmg=2.0,id="witchery:witchsapling"}},minCount=1,raw_name={"tile.witchery:witchsapling.hawthorn"}},
+        {maxCount=8,buyPrice=2,text="Сердце Демона",fingerprint={{dmg=23.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.demonheart"}},
+        {maxCount=16,buyPrice=0.5,text="Ветвь энта",fingerprint={{dmg=82.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.entbranch"}},
+        {maxCount=16,buyPrice=0.5,text="Демоническая кровь",fingerprint={{dmg=80.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.infernalblood"}},
+        {maxCount=8,buyPrice=0.9,text="Капля удачи",fingerprint={{dmg=39.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.dropofluck"}},
+        {maxCount=64,buyPrice=0.07,text="Слеза богини",fingerprint={{dmg=37.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.tearofthegoddess"}},
+        {maxCount=64,buyPrice=0.05,text="Выдох демона",fingerprint={{dmg=31.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.exhaleofthehornedone"}},
+        {maxCount=64,buyPrice=0.05,text="Дыхание богини",fingerprint={{dmg=32.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.breathofthegoddess"}},
+        {maxCount=64,buyPrice=0.2,text="Дуновение магии",fingerprint={{dmg=34.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.whiffofmagic"}},
+        {maxCount=16,buyPrice=0.6,text="Камень силы",fingerprint={{dmg=10.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.attunedstone"}},
+
     },
 
     ore = {
