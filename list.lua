@@ -84,6 +84,8 @@
         {text = "Кусочек урана 235", buyPrice = 0.5, minCount = 0, maxCount = 512, fingerprint = {{dmg=0.0,id="IC2:itemUran235small"}}, raw_name = {"ic2.itemuran235small"}},
         {text = "Энергетический кристалл", buyPrice = 2, minCount = 0, maxCount = 16, needed = 16, ignoreDamage = true, fingerprint = {{dmg=27.0,id="IC2:itemBatCrystal"}}, raw_name = {"ic2.itembatcrystal"}},
         {text = "Лазуротроновый кристалл", buyPrice = 5, minCount = 0, maxCount = 16, needed = 16, ignoreDamage = true, fingerprint = {{dmg=26.0,id="IC2:itemBatLamaCrystal"}}, raw_name = {"ic2.itembatlamacrystal"}},
+        {minCount=1,text="Укрепленный камень",buyPrice=0.5,maxCount=128,fingerprint={{dmg=0.0,id="IC2:blockAlloy"}},raw_name={"ic2.blockalloy"}},
+        {minCount=1,text="Силовой конвертер", needed = 4, buyPrice=5,maxCount=4,fingerprint={{dmg=0.0,id="PowerUtils:BlockMain"}},raw_name={"blockpowerconverter"}},
 
         {text = "Иридий", buyPrice = 10, minCount = 0, maxCount = 10, needed = 10, fingerprint = {{id="IC2:itemOreIridium",dmg=0.0}}, raw_name = {"ic2.itemoreiridium"}},
         {text = "Укр. иридиевая пластина", buyPrice = 40, minCount = 0, needed = 8, maxCount = 8, fingerprint = {{id="IC2:itemPartIridium",dmg=0.0}}, raw_name = {"ic2.itempartiridium"}},
@@ -163,6 +165,8 @@
         {minCount=0,raw_name={"item.ichorclothlegs"},fingerprint={{id="ThaumicTinkerer:ichorclothLegs",dmg=0.0}},maxCount=2,text="Ихоровые шаровары",buyPrice=105,needed=2, ignoreDamage = true},
         {minCount=0,raw_name={"item.ichorclothchest"},fingerprint={{id="ThaumicTinkerer:ichorclothChest",dmg=0.0}},maxCount=2,text="Ихоровая роба",buyPrice=120, needed=2, ignoreDamage = true},
         {minCount=0,raw_name={"item.ichorclothhelm"},fingerprint={{id="ThaumicTinkerer:ichorclothHelm",dmg=0.0}},maxCount=2,text="Ихоровый капюшон",buyPrice=75, needed=2, ignoreDamage = true},
+        {minCount=1,text="Магический сборщик", needed=4, buyPrice=7,maxCount=4,fingerprint={{dmg=0.0,id="thaumicenergistics:thaumicenergistics.block.arcane.assembler"}}, raw_name={"thaumicenergistics.block.arcane.assembler"}},
+
 
         --forestry
         {text = "Скопление пыльцы", buyPrice = 0.02, minCount = 0, maxCount = 512, fingerprint = {{id="Forestry:pollen",dmg=0.0}}, raw_name = {"item.for.pollen.normal"}},
@@ -308,6 +312,32 @@
         {maxCount=64,buyPrice=0.05,text="Дыхание богини",fingerprint={{dmg=32.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.breathofthegoddess"}},
         {maxCount=64,buyPrice=0.2,text="Дуновение магии",fingerprint={{dmg=34.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.whiffofmagic"}},
         {maxCount=16,buyPrice=0.6,text="Камень силы",fingerprint={{dmg=10.0,id="witchery:ingredient"}},minCount=1,raw_name={"item.witchery:ingredient.attunedstone"}},
+
+
+        --Seals
+        {minCount=1,needed = 2,text="Печать смерти",buyPrice=32.2,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Death_seal"}},raw_name={"item.death_seal"}},
+        {minCount=1,needed = 1,text="Лазерная печать",buyPrice=15,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Laser_seal"}},raw_name={"item.laser_seal"}},
+        {minCount=1,needed = 1,text="Печать удачи",buyPrice=5,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Ore_seal"}},raw_name={"item.ore_seal"}},
+        {minCount=1,needed = 2,text="Печать алхимии",buyPrice=5,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Potion_seal"}},raw_name={"item.potion_seal"}},
+        {minCount=1,needed = 1,text="Жидкостная печать",buyPrice=5,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Liquid_seal"}},raw_name={"item.liquid_seal"}},
+        {minCount=1,needed = 1,text="Модульная печать",buyPrice=10,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Module_seal"}},raw_name={"item.module_seal"}},
+        {minCount=1,needed = 1,text="Высокотехнологич. печать",buyPrice=100,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:High_technology_seal_seal"}},raw_name={"item.high_technology_seal_seal"}},
+        {minCount=1,needed = 1,text="Нано-печать",buyPrice=200,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Nano_seal"}},raw_name={"item.nano_seal"}},
+        {minCount=1,needed = 1,text="Электрическая печать",buyPrice=300,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Energy_seal"}},raw_name={"item.energy_seal"}},
+        {minCount=1,needed = 1,text="Радиационная печать",buyPrice=50,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Radio_seal"}},raw_name={"item.radio_seal"}},
+        {minCount=1,needed = 1,text="Печать лотоса",buyPrice=50,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Lotus_seal"}},raw_name={"item.lotus_seal"}},
+        {minCount=1,needed = 1,text="Печать света",buyPrice=5,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Lamp_seal"}},raw_name={"item.lamp_seal"}},
+        {minCount=1,needed = 1,text="Оптическая печать",buyPrice=206,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Optic_seal"}},raw_name={"item.optic_seal"}},
+        {minCount=1,needed = 1,text="Флаксовая печать",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Flux_seal"}},raw_name={"item.flux_seal"}},
+        {minCount=1,needed = 1,text="Кубическая печать",buyPrice=60.7,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Cube_seal"}},raw_name={"item.cube_seal"}},
+        {minCount=1,needed = 1,text="Магическая печать",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Magic_seal"}},raw_name={"item.magic_seal"}},
+        {minCount=1,needed = 1,text="Механическая печать",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Machine_seal"}},raw_name={"item.machine_seal"}},
+        {minCount=1,needed = 1,text="Печать жизни",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Grass_seal"}},raw_name={"item.grass_seal"}},
+        {minCount=1,needed = 1,text="Пчелиная печать",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Bee_seal"}},raw_name={"item.bee_seal"}},
+        {minCount=1,needed = 1,text="Печать защиты",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Armor_seal"}},raw_name={"item.armor_seal"}},
+        {minCount=1,needed = 1,text="Печать ДНК",buyPrice=1,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Dnk_seal"}},raw_name={"item.dnk_seal"}},
+        {minCount=1,needed = 1,text="Печать вампиризма",buyPrice=30,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Vamp_seal"}},raw_name={"item.vamp_seal"}},
+        {minCount=1,needed = 1,text="Печать Гайи",buyPrice=40,maxCount=1,fingerprint={{dmg=0.0,id="dwcity:Gaia_seal"}},raw_name={"item.gaia_seal"}},
 
     },
 
