@@ -98,7 +98,7 @@
         {text = "Солн. панель 4-го ур.", buyPrice = 800, needed = 1, minCount = 0, maxCount = 4, fingerprint = {{dmg=2.0,id="CompactSolars:CompactSolarBlock"}}, raw_name = {"tile.compactsolars.hv_block"}},
         {text = "Сверхпроводник", buyPrice = 55, minCount = 0, needed = 6, maxCount = 6, fingerprint = {{dmg=1.0,id="GraviSuite:itemSimpleItem"}}, raw_name = {"item.superconductor"}},
         {text="Релокатор", minCount=0,buyPrice=300,maxCount=3,fingerprint={{id="GraviSuite:relocator",dmg=1.0}}, raw_name={"item.relocator"}, ignoreDamage = true},
-        {text="Улучшенный алм. бур", minCount=0,buyPrice=50,maxCount=4,fingerprint={{id="GraviSuite:advDDrill",dmg=0.0}}, raw_name={"item.advddrill"}, ignoreDamage = true},
+        {text="Улучшенный алм. бур", minCount=0,buyPrice=50,maxCount=4,fingerprint={{id="GraviSuite:advDDrill",dmg=1.0}}, raw_name={"item.advddrill"}, ignoreDamage = true},
         {text="Гравитационный жилет", minCount=0,buyPrice=700,maxCount=3,fingerprint={{id="GraviSuite:graviChestPlate",dmg=0.0}},raw_name={"item.gravichestplate"}, ignoreDamage = true},
         {text = "Компрессор", buyPrice = 4, minCount = 0, needed = 4, maxCount = 4, fingerprint = {{dmg=5.0,id="IC2:blockMachine"}}, raw_name = {"ic2.blockcompressor"}},
         {text = "Электропечь", buyPrice = 3, minCount = 0, needed = 4, maxCount = 4, fingerprint = {{dmg=2.0,id="IC2:blockMachine"}}, raw_name = {"ic2.blockelecfurnace"}},
