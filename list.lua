@@ -31,7 +31,7 @@
         --ae2
         {text = "Кристалл истинного кварца", buyPrice = 0.2, minCount = 0, maxCount = 2048, fingerprint = {{dmg=0.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystal"}},
         {text = "Череп Скелета-Иссушителя", buyPrice = 30, minCount = 0, needed = 128, maxCount = 128, fingerprint = {{dmg=1.0,id="minecraft:skull"}}, raw_name = {"item.skull.wither"}},
-        {text = "Зар. кристалл ист. кварца", buyPrice = 0.5, minCount = 0, maxCount = 256, needed = 256, fingerprint = {{dmg=1.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystalcharged"}},
+        {text = "Зар. кристалл ист. кварца", buyPrice = 0.5, minCount = 0, maxCount = 256, fingerprint = {{dmg=1.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystalcharged"}},
         {text = "Вычислительный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=13.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.calcprocessorpress"}},
         {text = "Инженерный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=14.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.engprocessorpress"}},
         {text = "Логический пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=15.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.logicprocessorpress"}},
