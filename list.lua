@@ -30,7 +30,6 @@
 
         --ae2
         {text = "Кристалл истинного кварца", buyPrice = 0.2, minCount = 0, maxCount = 2048, fingerprint = {{dmg=0.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystal"}},
-        {text = "Череп Скелета-Иссушителя", buyPrice = 30, minCount = 0, needed = 128, maxCount = 128, fingerprint = {{dmg=1.0,id="minecraft:skull"}}, raw_name = {"item.skull.wither"}},
         {text = "Зар. кристалл ист. кварца", buyPrice = 0.5, minCount = 0, maxCount = 256, fingerprint = {{dmg=1.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystalcharged"}},
         {text = "Вычислительный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=13.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.calcprocessorpress"}},
         {text = "Инженерный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=14.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.engprocessorpress"}},
@@ -48,8 +47,8 @@
         {text="Гибридный МЭ интерфейс",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="dwcity:blockHybridInterface"}},minCount=0,raw_name={"tile.hybrid_interface"},buyPrice=5},
         {text="Совершенный МЭ интерфейс",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="dwcity:blockUltimateInterface"}},minCount=0,raw_name={"tile.ultimate_interface"},buyPrice=13.5},
         {text="Молекулярный сборщик",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockMolecularAssembler"}},minCount=0,raw_name={"tile.appliedenergistics2.blockmolecularassembler"},buyPrice=1},
-        {text="Улучшенный молек. сборщик",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="dwcity:blockAdvancedMAC"}},minCount=0,raw_name={"tile.advanced_mac"},buyPrice=2.0},
-        {text="Гибридный молек. сборщик",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="dwcity:blockHybridMAC"}},minCount=0,raw_name={"tile.hybrid_mac"},buyPrice=5},
+        {text="Улучшененный молекулярный сборщик",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="dwcity:blockAdvancedMAC"}},minCount=0,raw_name={"tile.advanced_mac"},buyPrice=2.0},
+        {text="Гибридный молекулярный сборщик",maxCount=32, needed=32,fingerprint={{dmg=0.0,id="dwcity:blockHybridMAC"}},minCount=0,raw_name={"tile.hybrid_mac"},buyPrice=5},
         {text="Зарядник",maxCount=16, needed=16,fingerprint={{dmg=0.0,id="appliedenergistics2:tile.BlockCharger"}},minCount=0,raw_name={"tile.appliedenergistics2.blockcharger"},buyPrice=1},
         {text="Туннель точка-точка",maxCount=8, needed=8,fingerprint={{dmg=460.0,id="appliedenergistics2:item.ItemMultiPart"}},minCount=0,raw_name={"item.appliedenergistics2.itempart.p2ptunnel"},buyPrice=2},
         {text="Карта ускорения",maxCount=128, needed=128,fingerprint={{dmg=30.0,id="appliedenergistics2:item.ItemMultiMaterial"}},minCount=0,raw_name={"item.appliedenergistics2.itemmaterial.cardspeed"},buyPrice=1},
