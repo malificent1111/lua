@@ -46,7 +46,7 @@
         {minCount=1,maxCount=4,needed=4,text="Переносная ячейка",raw_name={"item.appliedenergistics2.toolportablecell"},buyPrice=5,fingerprint={{dmg=0.0,id="appliedenergistics2:item.ToolPortableCell"}}},
         {minCount=1,maxCount=4,needed=4,text="Улучшенная переносная ячейка",raw_name={"item.advancedportablecell"},buyPrice=10,fingerprint={{dmg=0.0,id="dwcity:advancedPortableCell"}}},
         {minCount=1,maxCount=4,needed=4,text="Гибридная переносная ячейка",raw_name={"item.hybridportablecell"},buyPrice=50,fingerprint={{dmg=0.0,id="dwcity:hybridPortableCell"}}},
-        {minCount=1,maxCount=3,needed=3,text="Совершенная переносная ячейка",raw_name={"item.ultimateportablecell"},buyPrice=100,fingerprint={{dmg=0.0,id="dwcity:ultimatePortableCell"}}}}
+        {minCount=1,maxCount=3,needed=3,text="Совершенная переносная ячейка",raw_name={"item.ultimateportablecell"},buyPrice=100,fingerprint={{dmg=0.0,id="dwcity:ultimatePortableCell"}}},
         {text = "Кристалл истинного кварца", buyPrice = 0.2, minCount = 0, maxCount = 2048, fingerprint = {{dmg=0.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystal"}},
         {text = "Зар. кристалл ист. кварца", buyPrice = 0.5, minCount = 0, maxCount = 256, fingerprint = {{dmg=1.0,id="appliedenergistics2:item.ItemMultiMaterial"}}, raw_name = {"item.appliedenergistics2.itemmaterial.certusquartzcrystalcharged"}},
         {text = "Вычислительный пресс", buyPrice = 17, minCount = 0, maxCount = 2, needed = 2, fingerprint = {{id="appliedenergistics2:item.ItemMultiMaterial",dmg=13.0}}, raw_name = {"item.appliedenergistics2.itemmaterial.calcprocessorpress"}},
