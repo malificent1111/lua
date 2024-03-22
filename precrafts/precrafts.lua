@@ -4,103 +4,128 @@ local me = component.me_interface
 local data = {}
 local marketData = {}
 local gpu = component.gpu
+local internet = require("internet")
+local shell = require("shell")
+local args, options = shell.parse(...)
+local fs = require("filesystem")
 
-local file = io.open("craftsData")
-if not file then
-    print("File craftsData not found")
-    os.exit()
-end
+local function fetchDefaultPrecraftData()
+    local file = io.open("craftsData")
+    if not file then
+        print("File craftsData not found")
+        os.exit()
+    end
 
-local text = file:read("*a")
+    local text = file:read("*a")
 
-file:close()
-if(text ~= nil and text ~= '') then
-    data = serialize.unserialize(text)
-else
-    print("File with craftsData is empty")
-    os.exit()
-end
-
-local file = io.open("marketItems")
-if not file then
-    print("File marketItems not found")
-    os.exit()
-end
-
-local text = file:read("*a")
-
-file:close()
-if(text ~= nil and text ~= '') then
-    marketData = serialize.unserialize(text)
-else
-    print("File with marketItems is empty")
-    os.exit()
-end
-
-local precrafts = {}
-
-for k,v in pairs(data) do
-    precrafts[k] = {
-        fingerprint = {id = data[k].item.id, dmg = data[k].item.dmg},
-        name = data[k].name,
-        perCraft = data[k].craft,
-        minQty = data[k].items,
-        isCrafting = false,
-        craftingStatus = {},
-        tries = 0
-    }
-end
-
-local needToCraftMarket = {}
-
-for i = 1, #marketData do
-    if marketData[i].needed then
-        table.insert(needToCraftMarket, {
-            data = marketData[i],
-            craftingStatus = {},
-            isCrafting = false,
-            tries = 0
-        })
+    file:close()
+    if(text ~= nil and text ~= '') then
+        data = serialize.unserialize(text)
+    else
+        print("File with craftsData is empty")
+        os.exit()
     end
 end
 
-for i = 1, #needToCraftMarket do
-    delete = false
-    for j = 1, #precrafts do
-        if precrafts[j].fingerprint.id == needToCraftMarket[i].data.fingerprint[1].id  and
-        precrafts[j].fingerprint.dmg == needToCraftMarket[i].data.fingerprint[1].dmg then
-            delete = true
+
+
+local function downloadItems()
+    filename = "marketItemsFromGit"
+    local f, reason = io.open(filename, "w")
+    if not f then
+        io.stderr:write("Failed opening file for writing: " .. reason)
+        return
+    end
+    
+    io.write("Downloading market items... ")
+    local url = "https://raw.githubusercontent.com/malificent1111/lua/main/list.lua"
+    local result, response = pcall(internet.request, url)
+    if result then
+        io.write("success.\n")
+        for chunk in response do
+            if not options.k then
+                string.gsub(chunk, "\r\n", "\n")
+            end
+            f:write(chunk)
+        end
+
+        f:close()
+        io.write("Saved data to " .. filename .. "\n")
+    else
+        io.write("failed.\n")
+        f:close()
+        fs.remove(filename)
+        io.stderr:write("HTTP request failed: " .. response .. "\n")
+    end
+end
+
+
+
+local function removeMatchesFromDefaultList()
+    needToCraftMarket = {}
+
+    for i = 1, #marketData do
+        if marketData[i].needed then
+            table.insert(needToCraftMarket, {
+                data = marketData[i],
+                craftingStatus = {},
+                isCrafting = false,
+                tries = 0
+            })
         end
     end
-    if delete then
-        needToCraftMarket[i] = "deleted"
+
+    for i = 1, #needToCraftMarket do
+        delete = false
+        for j = 1, #precrafts do
+            if precrafts[j].fingerprint.id == needToCraftMarket[i].data.fingerprint[1].id  and
+            precrafts[j].fingerprint.dmg == needToCraftMarket[i].data.fingerprint[1].dmg then
+                delete = true
+            end
+        end
+        if delete then
+            needToCraftMarket[i] = "deleted"
+        end
     end
 end
 
-local solarPanels = {
-    fingerprint = {name = 'IC2:blockGenerator', damage = 3.0},
-    name = 'Солнечная панель 1-го уровня',
-    perCraft = 100,
-    ironQty = 30000,
-    isCrafting = false,
-    craftingStatus = {},
-    tries = 0
-}
 
-local redstone = {
-    fingerprint = {name = 'minecraft:redstone', damage = 0.0},
-    name = 'Красная пыль',
-    perCraft = 1152,
-    rsBlocks = 128,
-    isCrafting = false,
-    craftingStatus = {},
-}
 
-local materia = {
-    fingerprint = {name = 'dwcity:Materia', damage = 0.0},
-    limit = 1072,
-    isCrafting = false,
-}
+local function fetchMarketData()
+    downloadItems()
+    
+    local file = io.open("marketItemsFromGit")
+    if not file then
+        print("File marketItemsFromGit not found")
+        os.exit()
+    end
+
+    local text = file:read("*a")
+
+    file:close()
+    if(text ~= nil and text ~= '') then
+        marketData = serialize.unserialize(text).shop
+    else
+        print("File with marketItemsFromGit is empty")
+        os.exit()
+    end
+
+    precrafts = {}
+
+    for k,v in pairs(data) do
+        precrafts[k] = {
+            fingerprint = {id = data[k].item.id, dmg = data[k].item.dmg},
+            name = data[k].name,
+            perCraft = data[k].craft,
+            minQty = data[k].items,
+            isCrafting = false,
+            craftingStatus = {},
+            tries = 0
+        }
+    end
+    removeMatchesFromDefaultList()
+end
+
 
 
 function areOresCrafting()
@@ -134,8 +159,38 @@ function areOresCrafting()
     return false
 end
 
-while true do
+local solarPanels = {
+    fingerprint = {name = 'IC2:blockGenerator', damage = 3.0},
+    name = 'Солнечная панель 1-го уровня',
+    perCraft = 100,
+    ironQty = 30000,
+    isCrafting = false,
+    craftingStatus = {},
+    tries = 0
+}
 
+local redstone = {
+    fingerprint = {name = 'minecraft:redstone', damage = 0.0},
+    name = 'Красная пыль',
+    perCraft = 1152,
+    rsBlocks = 128,
+    isCrafting = false,
+    craftingStatus = {},
+}
+
+local materia = {
+    fingerprint = {name = 'dwcity:Materia', damage = 0.0},
+    limit = 1072,
+    isCrafting = false,
+}
+
+fetchDefaultPrecraftData()
+fetchMarketData()
+
+
+
+while true do
+--endregion: default precrafts
     for i = 1, #precrafts do
         local qty = -1
         while qty == -1 do
@@ -177,7 +232,11 @@ while true do
 
         end
     end
-
+--endregion: default precrafts
+    
+    
+    
+--region: market data precraft
     for i = 1, #needToCraftMarket do
         if needToCraftMarket[i] ~= "deleted" then
             qty = -1
@@ -222,7 +281,11 @@ while true do
         end
 
     end
-
+--endregion: market data precraft
+    
+    
+    
+--region: redstone precraft
     local rsBlocks = -1
     while rsBlocks == -1 do
         if pcall(function ()
@@ -247,7 +310,11 @@ while true do
             end
         end
     end
-
+--endregion: redstone precraft
+    
+    
+    
+--region: solar panels precraft
     local materiaQty = -1
     while materiaQty == -1 do
         if pcall(function ()
@@ -298,7 +365,7 @@ while true do
         if (pcall(function() me.getCraftables(solarPanels.fingerprint)[1].request(solarPanels.perCraft) end)) then
         end
     end
-
+--endregion: solar panels precraft
 
 
 
