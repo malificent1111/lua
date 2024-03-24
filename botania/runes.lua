@@ -2,9 +2,9 @@ local component = require("component")
 local t = component.transposer
 local rs = component.redstone
 
-local runeAltar = 3 --transposer looking towards runealtar (south)
+local runeAltar = 3 --transposer looking towards runealtar (im using south)
 local chest = 1 --the chest is on top
-local rsSide = 2 --redstone controller is looking towards dropper (north)
+local rsSide = 2 --redstone controller is looking towards dropper (im using north)
 
 while true do
     if t.getStackInSlot(chest, 1) ~= nil and t.getStackInSlot(runeAltar, 1) == nil then
