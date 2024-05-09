@@ -219,7 +219,7 @@
         {needed = 2, text="Резон. распределитель жидкостей",buyPrice=9,raw_name={"tile.thermalexpansion.machine.transposer"},minCount=1,fingerprint={{dmg=5.0,id="ThermalExpansion:Machine"}},maxCount=2},
         {needed = 2, text="Резонирующий измельчитель",buyPrice=8.9,raw_name={"tile.thermalexpansion.machine.pulverizer"},minCount=1,fingerprint={{dmg=1.0,id="ThermalExpansion:Machine"}},maxCount=2},
         {needed = 2, text="Резон. индукционная плавильня",buyPrice=10.6,raw_name={"tile.thermalexpansion.machine.smelter"},minCount=1,fingerprint={{dmg=3.0,id="ThermalExpansion:Machine"}},maxCount=2},
-        {text="Резонирующий магмовый тигель",buyPrice=10.6,raw_name={"tile.thermalexpansion.machine.crucible"},minCount=1,fingerprint={{dmg=4.0,id="ThermalExpansion:Machine"}},maxCount=2},
+        --{text="Резонирующий магмовый тигель",buyPrice=10.6,raw_name={"tile.thermalexpansion.machine.crucible"},minCount=1,fingerprint={{dmg=4.0,id="ThermalExpansion:Machine"}},maxCount=2},
         {needed = 2, text="Резонирующ. вулканический пресс",buyPrice=8.85,raw_name={"tile.thermalexpansion.machine.extruder"},minCount=1,fingerprint={{dmg=7.0,id="ThermalExpansion:Machine"}},maxCount=2},
 
         --dwcity
