@@ -17,7 +17,7 @@ local me_side = "DOWN"
 local pim_side = "UP"
 local server = "Default"
 local version, port = "modem", 1414
-local serverAddress = "d4191282-b2d8-4be3-8363-7b859e4d8195"
+local serverAddress = "6fccfc0c-082c-4228-9dec-71a2185ea085"
 
 local priceLottery = 150
 local superPrize = 10000
@@ -26,10 +26,9 @@ local freeFoodCount = 16
 local INFO = [[
 [0x68f029]1. [0xffffff]Что это такое? Ответ — Это магазин.
 [0x68f029]2. [0xffffff]Что такое Emeralds? Ответ — это валюта сервера.
-[0x68f029]3. [0xffffff]Как пополнить баланс? Ответ - используя сундуки рядом    купите "деньги", затем продайте их в магазие пополнив свой  баланс.
+[0x68f029]3. [0xffffff]Как пополнить баланс? Ответ - используя сундуки рядом    купите "деньги", затем используйте кнопку "Пополнить баланс" в магазине.
 [0x68f029]4. [0xffffff]Как купить товар? Ответ — нужно выбрать товар из списка, кликнув далее ввести количество и нажать "Купить". Товар    будет добавлен в ваш инвентарь. Если эмов на счету недостаточно - товар нельзя будет купить.
-[0x68f029]5. [0xffffff]Что за режим поиска предметов? Ответ — нажимая на "1 слот" магазин ищет предмет в 1 слоте вашего инвентаря. Внимание! "Весь инвентарь" — означает что ВЕСЬ ваш инвентарь будет просканирован.
-[0x68f029]6. [0xffffff]За нарушение правил сервера при использовании магазина вы будете заблокированы.
+[0x68f029]5. [0xffffff]За нарушение правил сервера при использовании магазина вы будете заблокированы.
 ]]
 
 local pim, me, selector, tmpfs, modem = proxy("pim"), proxy("me_interface"), proxy("openperipheral_selector"), component.proxy(computer.tmpAddress())
@@ -164,7 +163,7 @@ local function drawPim()
 end
 
 local function discord()
-    setColorText(6, 18, "[0x303030]По любым проблемам пишите: [0x337d11]Doggernaut, tarcassum", color.background)
+    setColorText(6, 18, "[0x303030]По любым проблемам пишите: [0x337d11]Doggernaut", color.background) --tarcassum
 end
 
 local function outOfService(reason)
@@ -1490,7 +1489,7 @@ function login(name)
 
         if active then
             clear()
-            setColorText(18, 2, "[0xffffff]Приветствуем на варпе [0x68f029]abc[0xffffff]!", color.background)
+            setColorText(18, 2, "[0xffffff]Приветствуем на варпе [0x68f029]wim[0xffffff]!", color.background)
             setColorText(17, 5, "[0xffffff]Встаньте на [0x46c8e3]PIM[0xffffff], чтобы войти", color.background)
             discord()
             drawPim()
