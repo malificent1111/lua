@@ -163,7 +163,7 @@ local function drawPim()
 end
 
 local function discord()
-    setColorText(6, 18, "[0x303030]По любым проблемам пишите: [0x337d11]Doggernaut", color.background) --tarcassum
+    setColorText(12, 18, "[0x303030]По любым проблемам пишите: [0x337d11]Doggernaut", color.background) --tarcassum
 end
 
 local function outOfService(reason)
