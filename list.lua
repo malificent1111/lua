@@ -26,7 +26,7 @@
         {text = "Яйцо", buyPrice = 0.1, minCount = 0, maxCount = 1024, fingerprint = {{id="minecraft:egg",dmg=0.0}}, raw_name = {"item.egg"}},
         {text = "Сахарный тростник", buyPrice = 0.01, minCount = 0, maxCount = 2048, fingerprint = {{id="minecraft:reeds",dmg=0.0}}, raw_name = {"item.reeds"}},
         {text = "Череп Скелета-Иссушителя", buyPrice = 30, minCount = 0, needed = 128, maxCount = 128, fingerprint = {{dmg=1.0,id="minecraft:skull"}}, raw_name = {"item.skull.wither"}},
-        {text="3олотой Cлиток", minCount=0, fingerprint={{dmg=0.0,id="minecraft:gold_ingot"}}, raw_name={"item.ingotgold"},maxCount=512,buyPrice = 0.1}},
+        {text="3олотой Cлиток", minCount=0, fingerprint={{dmg=0.0,id="minecraft:gold_ingot"}}, raw_name={"item.ingotgold"},maxCount=512,buyPrice = 0.1},
 
 
         --ae2
