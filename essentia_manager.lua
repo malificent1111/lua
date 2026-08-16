@@ -803,115 +803,76 @@ end
 
 local function maintainAspect(aspect)
 
-    local current =
+    local currentConfig =
         ensureConfig(aspect)
 
-
-    if not current.enabled then
-
-        status[aspect] =
-            "OFF"
-
+    if not currentConfig.enabled then
+        status[aspect] = "OFF"
         return
     end
 
-
-    if current.sourceId == "" then
-
-        status[aspect] =
-            "NO SOURCE"
-
+    if currentConfig.sourceId == "" then
+        status[aspect] = "NO SOURCE"
         return
     end
 
-
-    local currentEss =
+    local currentEssentia =
         safeNumber(
             currentEssentia[aspect],
             0
         )
 
-
     local target =
         safeNumber(
-            current.target,
+            currentConfig.target,
             0
         )
 
-
-    local trigger =
-        safeNumber(
-            current.trigger,
-            0
-        )
-
-
-    local refillPoint =
-        math.max(
-            0,
-            target - trigger
-        )
-
-
-    if currentEss > refillPoint then
-
-        if craftStatus[aspect] then
-
-            status[aspect] =
-                "CRAFTING"
-
-        else
-
-            status[aspect] =
-                "OK"
-        end
-
+    if currentEssentia >= target then
+        status[aspect] = "OK"
         return
     end
-
 
     local neededEssentia =
-        target - currentEss
-
-
-    if neededEssentia <= 0 then
-
-        status[aspect] =
-            "OK"
-
-        return
-    end
-
+        target - currentEssentia
 
     local yield =
         safeNumber(
-            current.essentiaPerItem,
+            currentConfig.essentiaPerItem,
             1
         )
 
-
     if yield <= 0 then
-
-        status[aspect] =
-            "BAD YIELD"
-
+        status[aspect] = "BAD YIELD"
         return
     end
 
-
+    -- Примерная оценка того,
+    -- сколько source-предметов имеет смысл обеспечить.
     local requiredItems =
         math.ceil(
             neededEssentia / yield
         )
 
+    -- --------------------------------------------------------
+    -- Сколько source-предметов уже находится в ME.
+    -- --------------------------------------------------------
 
     local available =
         getSourceAmount(aspect)
 
-
     sourceAmounts[aspect] =
         available
 
+
+    -- --------------------------------------------------------
+    -- Source уже есть:
+    -- просто отдаём его в печь.
+    --
+    -- Нас не интересует, сколько именно essentia
+    -- фактически получилось после плавки.
+    -- На следующем проходе снова посмотрим currentEssentia.
+    -- --------------------------------------------------------
 
     if available > 0 then
 
@@ -928,10 +889,19 @@ local function maintainAspect(aspect)
             )
 
         if moved > 0 then
+
+            status[aspect] = "FEEDING"
+
             return
         end
     end
 
+
+    -- --------------------------------------------------------
+    -- Source не появился / не удалось экспортировать.
+    --
+    -- Проверяем ещё раз общий индекс ME.
+    -- --------------------------------------------------------
 
     available =
         getSourceAmount(aspect)
@@ -940,33 +910,38 @@ local function maintainAspect(aspect)
         available
 
 
-    if available >= requiredItems then
+    if available > 0 then
 
         local moved =
             exportSource(
                 aspect,
-                requiredItems
+                math.min(
+                    available,
+                    requiredItems
+                )
             )
 
         if moved > 0 then
+
+            status[aspect] = "FEEDING"
+
             return
         end
     end
 
 
-    local missing =
-        requiredItems - available
+    -- --------------------------------------------------------
+    -- Source отсутствует.
+    --
+    -- Просим AE2 изготовить примерно нужное количество.
+    -- Не ждём окончания крафта здесь.
+    -- --------------------------------------------------------
 
+    requestSourceCraft(
+        aspect,
+        requiredItems
+    )
 
-    if missing > 0 then
-
-        requestSourceCraft(
-            aspect,
-            missing
-        )
-
-        return
-    end
 end
 
 
