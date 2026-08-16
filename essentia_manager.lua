@@ -42,27 +42,28 @@ local inventory = component.inventory_controller
 -- PHYSICAL CONFIGURATION
 -- ============================================================
 
--- Chest used for selecting source items.
--- Put the desired source item into this chest, slot 1.
+-- Put the source item into this chest, slot 1.
+-- Inventory Controller must be able to see this side.
 
 local SOURCE_SCAN_SIDE = sides.north
 local SOURCE_SCAN_SLOT = 1
 
 
 -- ME Interface output direction.
--- The destination inventory may use any available slot.
+-- No destination slot is specified:
+-- the interface may use any available slot.
 
 local EXPORT_DIRECTION = "DOWN"
 
 
 -- ============================================================
--- GENERAL CONFIG
+-- GENERAL CONFIGURATION
 -- ============================================================
 
 local CONFIG_FILE = "/home/essentia_manager.cfg"
 
--- getFluidsInNetwork() returns essentia in 128-unit values
--- in this setup.
+-- In this setup one real essentia corresponds to 128 units
+-- returned by getFluidsInNetwork().
 
 local ESSENTIA_SCALE = 128
 
@@ -72,77 +73,82 @@ local DEFAULT_TRIGGER = 512
 local DEFAULT_YIELD = 1
 
 
--- Full ME network refresh interval.
+-- Complete network scan interval.
 
 local REFRESH_INTERVAL = 1.0
 
 
--- Minimum time between repeated source-crafting requests
--- for the same aspect.
+-- Minimum time before another request for the same source.
 
 local CRAFT_RECHECK_INTERVAL = 10
 
 
--- Safety limit for one export operation.
+-- Maximum amount exported in one logical operation.
 
 local MAX_EXPORT_PER_RUN = 4096
 
 
 -- ============================================================
--- SCREEN
+-- UI CONFIGURATION
 -- ============================================================
 
 local width, height = gpu.getResolution()
 
-local ROWS =
+local CARD_COLUMNS = 4
+local CARD_HEIGHT = 4
+local CARD_GAP = 1
+
+local HEADER_HEIGHT = 4
+local FOOTER_HEIGHT = 2
+
+local availableCardHeight =
+    height
+    - HEADER_HEIGHT
+    - FOOTER_HEIGHT
+
+local CARD_ROWS =
     math.max(
-        5,
-        height - 8
+        2,
+        math.floor(
+            availableCardHeight
+            / (CARD_HEIGHT + 1)
+        )
     )
 
-
-local page = 1
-local selected = nil
-
-local uiDirty = true
-local fullRedraw = true
-
-local lastRefresh = 0
+local CARDS_PER_PAGE =
+    CARD_COLUMNS * CARD_ROWS
 
 
 -- ============================================================
 -- COLORS
 -- ============================================================
 
-local COLOR_BG = 0x202020
-local COLOR_HEADER = 0x303030
-local COLOR_SELECTED = 0x304060
-local COLOR_BUTTON = 0x404040
+local COLOR_BG = 0x191919
+local COLOR_PANEL = 0x252525
+local COLOR_PANEL_2 = 0x303030
+local COLOR_SELECTED = 0x344A63
 
 local COLOR_WHITE = 0xFFFFFF
-local COLOR_GREY = 0x909090
-local COLOR_GREEN = 0x55FF55
-local COLOR_YELLOW = 0xFFFF55
-local COLOR_RED = 0xFF5555
-local COLOR_BLUE = 0x55AAFF
+local COLOR_GREY = 0x888888
+
+local COLOR_GREEN = 0x48C774
+local COLOR_YELLOW = 0xE0C04C
+local COLOR_BLUE = 0x4EA5D9
+local COLOR_ORANGE = 0xE08A38
+local COLOR_RED = 0xD94B4B
+local COLOR_PURPLE = 0xA66DD4
 
 
 -- ============================================================
--- DATA
+-- STATE
 -- ============================================================
 
 local config = {}
 
 local fluids = {}
-
 local currentEssentia = {}
 
--- Complete ME item index.
--- key = "name|damage"
--- value = total amount
-
 local allItemsIndex = {}
-
 local sourceAmounts = {}
 
 local craftAttemptTime = {}
@@ -150,20 +156,30 @@ local craftAttemptTime = {}
 local status = {}
 
 local aspects = {}
-
-local lastRows = {}
+local filteredAspects = {}
 
 local scannerItem = nil
 
+local selected = nil
+
+local filterMode = "ALL"
+
+local page = 1
+
+local lastRefresh = 0
 local lastScannerScan = 0
+
+local uiDirty = true
+local fullRedraw = true
+
+local lastCardSignatures = {}
 
 
 -- ============================================================
--- UTILITY
+-- BASIC HELPERS
 -- ============================================================
 
 local function safeNumber(value, fallback)
-
     local number = tonumber(value)
 
     if number == nil then
@@ -174,8 +190,32 @@ local function safeNumber(value, fallback)
 end
 
 
-local function prettyAspect(aspect)
+local function numberString(value)
+    value = math.floor(
+        safeNumber(value, 0)
+    )
 
+    local text = tostring(value)
+
+    while true do
+        local replaced, count =
+            text:gsub(
+                "^(-?%d+)(%d%d%d)",
+                "%1 %2"
+            )
+
+        if count == 0 then
+            break
+        end
+
+        text = replaced
+    end
+
+    return text
+end
+
+
+local function prettyAspect(aspect)
     if not aspect then
         return "?"
     end
@@ -188,75 +228,37 @@ local function prettyAspect(aspect)
 end
 
 
-local function numberString(value)
-
-    value =
-        math.floor(
-            safeNumber(
-                value,
-                0
-            )
-        )
-
-
-    local textValue =
-        tostring(value)
-
-
-    while true do
-
-        local replaced, count =
-            textValue:gsub(
-                "^(-?%d+)(%d%d%d)",
-                "%1 %2"
-            )
-
-
-        if count == 0 then
-            break
-        end
-
-
-        textValue = replaced
-    end
-
-
-    return textValue
-end
-
-
 local function realEssentiaAmount(value)
-
     return math.floor(
-        safeNumber(
-            value,
-            0
-        )
+        safeNumber(value, 0)
         / ESSENTIA_SCALE
     )
 end
 
 
--- ============================================================
--- ITEM IDENTIFIERS
--- ============================================================
-
 local function itemKey(name, damage)
-
     return
         tostring(name or "")
         .. "|"
         .. tostring(
-            safeNumber(
-                damage,
-                0
-            )
+            safeNumber(damage, 0)
         )
 end
 
 
-local function makeItemFilter(fingerprint)
+-- ============================================================
+-- FINGERPRINT
+-- ============================================================
 
+local function makeExportFingerprint(name, damage)
+    return {
+        id = name,
+        dmg = safeNumber(damage, 0)
+    }
+end
+
+
+local function makeItemFilter(fingerprint)
     return {
         name = fingerprint.id,
         damage = fingerprint.dmg
@@ -264,15 +266,35 @@ local function makeItemFilter(fingerprint)
 end
 
 
-local function makeExportFingerprint(
-    name,
-    damage
-)
+local function getSourceFingerprint(aspect)
+
+    local current =
+        config[aspect]
+
+    if not current then
+        return nil
+    end
+
+    if not current.sourceFingerprint then
+        return nil
+    end
+
+    if type(current.sourceFingerprint) ~= "table" then
+        return nil
+    end
+
+    if not current.sourceFingerprint.id then
+        return nil
+    end
+
+    if current.sourceFingerprint.id == "" then
+        return nil
+    end
 
     return {
-        id = name,
+        id = current.sourceFingerprint.id,
         dmg = safeNumber(
-            damage,
+            current.sourceFingerprint.dmg,
             0
         )
     }
@@ -280,11 +302,10 @@ end
 
 
 -- ============================================================
--- CONFIGURATION
+-- CONFIG
 -- ============================================================
 
 local function defaultConfig()
-
     return {
         enabled = false,
 
@@ -306,35 +327,27 @@ local function ensureConfig(aspect)
             defaultConfig()
     end
 
-
     local current =
         config[aspect]
-
 
     if current.enabled == nil then
         current.enabled = false
     end
 
-
     if current.target == nil then
-        current.target =
-            DEFAULT_TARGET
+        current.target = DEFAULT_TARGET
     end
-
 
     if current.trigger == nil then
-        current.trigger =
-            DEFAULT_TRIGGER
+        current.trigger = DEFAULT_TRIGGER
     end
-
 
     if current.essentiaPerItem == nil then
         current.essentiaPerItem =
             DEFAULT_YIELD
     end
 
-
-    -- Backward compatibility with the old config format.
+    -- Convert old configuration format if necessary.
 
     if not current.sourceFingerprint then
 
@@ -349,7 +362,6 @@ local function ensureConfig(aspect)
         end
     end
 
-
     return current
 end
 
@@ -357,12 +369,9 @@ end
 local function loadConfig()
 
     if not filesystem.exists(CONFIG_FILE) then
-
         config = {}
-
         return
     end
-
 
     local file =
         io.open(
@@ -370,21 +379,15 @@ local function loadConfig()
             "r"
         )
 
-
     if not file then
-
         config = {}
-
         return
     end
-
 
     local data =
         file:read("*a")
 
-
     file:close()
-
 
     local ok, result =
         pcall(
@@ -392,13 +395,9 @@ local function loadConfig()
             data
         )
 
-
     if ok and type(result) == "table" then
-
         config = result
-
     else
-
         config = {}
     end
 end
@@ -412,18 +411,13 @@ local function saveConfig()
             "w"
         )
 
-
     if not file then
         return false
     end
 
-
     file:write(
-        serialization.serialize(
-            config
-        )
+        serialization.serialize(config)
     )
-
 
     file:close()
 
@@ -441,10 +435,8 @@ local function parseEssentiaFluid(name)
         return nil
     end
 
-
     local lowerName =
         name:lower()
-
 
     if lowerName:sub(1, 7)
         ~= "gaseous" then
@@ -452,13 +444,11 @@ local function parseEssentiaFluid(name)
         return nil
     end
 
-
     if lowerName:sub(-8)
         ~= "essentia" then
 
         return nil
     end
-
 
     local aspect =
         lowerName:sub(
@@ -466,11 +456,9 @@ local function parseEssentiaFluid(name)
             -9
         )
 
-
     if aspect == "" then
         return nil
     end
-
 
     return aspect
 end
@@ -480,19 +468,16 @@ local function scanFluids()
 
     local result = {}
 
-
     local ok, rawFluids =
         pcall(
             me.getFluidsInNetwork
         )
-
 
     if not ok
         or type(rawFluids) ~= "table" then
 
         return result
     end
-
 
     for _, fluid in pairs(rawFluids) do
 
@@ -501,11 +486,9 @@ local function scanFluids()
                 fluid.name
             )
 
-
         if aspect then
 
             result[aspect] = {
-
                 amount =
                     realEssentiaAmount(
                         fluid.amount
@@ -522,26 +505,22 @@ local function scanFluids()
 
                 label =
                     fluid.label
-                    or prettyAspect(
-                        aspect
-                    )
+                    or prettyAspect(aspect)
             }
         end
     end
-
 
     return result
 end
 
 
 -- ============================================================
--- COMPLETE ME ITEM SCAN
+-- COMPLETE ITEM INDEX
 -- ============================================================
 
 local function scanAllItems()
 
     local result = {}
-
 
     local ok, rawItems =
         pcall(
@@ -549,13 +528,11 @@ local function scanAllItems()
             {}
         )
 
-
     if not ok
         or type(rawItems) ~= "table" then
 
         return result
     end
-
 
     for _, item in pairs(rawItems) do
 
@@ -567,13 +544,11 @@ local function scanAllItems()
                     0
                 )
 
-
             local key =
                 itemKey(
                     item.name,
                     damage
                 )
-
 
             result[key] =
                 (
@@ -586,7 +561,6 @@ local function scanAllItems()
                 )
         end
     end
-
 
     return result
 end
@@ -605,7 +579,6 @@ local function scanSourceChest()
             SOURCE_SCAN_SLOT
         )
 
-
     if not ok
         or type(stack) ~= "table"
         or not stack.name then
@@ -615,11 +588,8 @@ local function scanSourceChest()
         return nil
     end
 
-
     scannerItem = {
-
-        name =
-            stack.name,
+        name = stack.name,
 
         damage =
             safeNumber(
@@ -635,66 +605,15 @@ local function scanSourceChest()
 
         label =
             stack.label
-            or stack.name,
-
-        hasTag =
-            stack.hasTag
-            or false
+            or stack.name
     }
-
 
     return scannerItem
 end
 
 
 -- ============================================================
--- SOURCE FINGERPRINT
--- ============================================================
-
-local function getSourceFingerprint(aspect)
-
-    local current =
-        ensureConfig(
-            aspect
-        )
-
-
-    if not current.sourceFingerprint then
-        return nil
-    end
-
-
-    if type(
-        current.sourceFingerprint
-    ) ~= "table" then
-
-        return nil
-    end
-
-
-    if not current.sourceFingerprint.id
-        or current.sourceFingerprint.id == "" then
-
-        return nil
-    end
-
-
-    return {
-
-        id =
-            current.sourceFingerprint.id,
-
-        dmg =
-            safeNumber(
-                current.sourceFingerprint.dmg,
-                0
-            )
-    }
-end
-
-
--- ============================================================
--- SOURCE AMOUNT FROM LOCAL INDEX
+-- SOURCE AMOUNT
 -- ============================================================
 
 local function getSourceAmount(aspect)
@@ -704,18 +623,15 @@ local function getSourceAmount(aspect)
             aspect
         )
 
-
     if not fingerprint then
         return 0
     end
-
 
     local key =
         itemKey(
             fingerprint.id,
             fingerprint.dmg
         )
-
 
     return safeNumber(
         allItemsIndex[key],
@@ -728,20 +644,16 @@ end
 -- FIND SOURCE CRAFTABLE
 -- ============================================================
 
-local function findSourceCraftable(
-    aspect
-)
+local function findSourceCraftable(aspect)
 
     local fingerprint =
         getSourceFingerprint(
             aspect
         )
 
-
     if not fingerprint then
         return nil
     end
-
 
     local ok, craftables =
         pcall(
@@ -751,13 +663,11 @@ local function findSourceCraftable(
             )
         )
 
-
     if not ok
         or type(craftables) ~= "table" then
 
         return nil
     end
-
 
     for _, craft in pairs(craftables) do
 
@@ -768,7 +678,6 @@ local function findSourceCraftable(
                 end
             )
 
-
         if okStack
             and type(stack) == "table" then
 
@@ -777,7 +686,6 @@ local function findSourceCraftable(
                     stack.damage,
                     0
                 )
-
 
             if stack.name
                 == fingerprint.id
@@ -789,13 +697,12 @@ local function findSourceCraftable(
         end
     end
 
-
     return nil
 end
 
 
 -- ============================================================
--- REQUEST SOURCE CRAFT
+-- SOURCE CRAFT REQUEST
 -- ============================================================
 
 local function requestSourceCraft(
@@ -806,10 +713,8 @@ local function requestSourceCraft(
     local now =
         computer.uptime()
 
-
     local previous =
         craftAttemptTime[aspect]
-
 
     if previous
         and now - previous
@@ -821,12 +726,10 @@ local function requestSourceCraft(
         return false
     end
 
-
     local craft =
         findSourceCraftable(
             aspect
         )
-
 
     if not craft then
 
@@ -836,25 +739,17 @@ local function requestSourceCraft(
         return false
     end
 
-
     amount =
         math.max(
             1,
-            math.floor(
-                amount
-            )
+            math.floor(amount)
         )
-
-
-    -- Small batches avoid filling the crafting queue
-    -- with a huge number of unnecessary requests.
 
     local requestAmount =
         math.min(
             amount,
             8
         )
-
 
     local ok, request =
         pcall(
@@ -868,12 +763,11 @@ local function requestSourceCraft(
             end
         )
 
-
     craftAttemptTime[aspect] =
         now
 
-
-    if not ok or not request then
+    if not ok
+        or not request then
 
         status[aspect] =
             "CRAFT ERROR"
@@ -881,10 +775,8 @@ local function requestSourceCraft(
         return false
     end
 
-
     status[aspect] =
         "CRAFTING SOURCE"
-
 
     return true
 end
@@ -904,7 +796,6 @@ local function exportSource(
             aspect
         )
 
-
     if not fingerprint then
 
         status[aspect] =
@@ -912,7 +803,6 @@ local function exportSource(
 
         return 0
     end
-
 
     amount =
         math.floor(
@@ -922,11 +812,9 @@ local function exportSource(
             )
         )
 
-
     if amount <= 0 then
         return 0
     end
-
 
     amount =
         math.min(
@@ -934,23 +822,19 @@ local function exportSource(
             MAX_EXPORT_PER_RUN
         )
 
-
     local movedTotal = 0
-
 
     for _ = 1, 32 do
 
         local remaining =
             amount - movedTotal
 
-
         if remaining <= 0 then
             break
         end
 
-
         -- No destination slot:
-        -- the ME Interface chooses a suitable free slot.
+        -- interface chooses a free slot.
 
         local ok, result =
             pcall(
@@ -960,7 +844,6 @@ local function exportSource(
                 remaining
             )
 
-
         if not ok then
 
             status[aspect] =
@@ -969,9 +852,7 @@ local function exportSource(
             return movedTotal
         end
 
-
         local moved = 0
-
 
         if type(result) == "table" then
 
@@ -986,28 +867,19 @@ local function exportSource(
             moved = result
         end
 
-
         if moved <= 0 then
             break
         end
-
 
         movedTotal =
             movedTotal + moved
     end
 
-
     if movedTotal > 0 then
-
-        status[aspect] =
-            "FEEDING"
-
+        status[aspect] = "FEEDING"
     else
-
-        status[aspect] =
-            "EXPORT FAILED"
+        status[aspect] = "EXPORT FAILED"
     end
-
 
     return movedTotal
 end
@@ -1020,10 +892,7 @@ end
 local function maintainAspect(aspect)
 
     local current =
-        ensureConfig(
-            aspect
-        )
-
+        ensureConfig(aspect)
 
     if not current.enabled then
 
@@ -1033,12 +902,10 @@ local function maintainAspect(aspect)
         return
     end
 
-
     local fingerprint =
         getSourceFingerprint(
             aspect
         )
-
 
     if not fingerprint then
 
@@ -1048,20 +915,17 @@ local function maintainAspect(aspect)
         return
     end
 
-
     local currentEss =
         safeNumber(
             currentEssentia[aspect],
             0
         )
 
-
     local target =
         safeNumber(
             current.target,
             0
         )
-
 
     if currentEss >= target then
 
@@ -1071,17 +935,14 @@ local function maintainAspect(aspect)
         return
     end
 
-
     local neededEssentia =
         target - currentEss
-
 
     local yield =
         safeNumber(
             current.essentiaPerItem,
             1
         )
-
 
     if yield <= 0 then
 
@@ -1091,26 +952,21 @@ local function maintainAspect(aspect)
         return
     end
 
-
     local requiredItems =
         math.ceil(
             neededEssentia
             / yield
         )
 
-
-    -- --------------------------------------------------------
-    -- Source already exists in ME.
-    -- Feed it immediately.
-    -- --------------------------------------------------------
+    -- Source already available.
 
     local available =
-        getSourceAmount(aspect)
-
+        getSourceAmount(
+            aspect
+        )
 
     sourceAmounts[aspect] =
         available
-
 
     if available > 0 then
 
@@ -1120,29 +976,190 @@ local function maintainAspect(aspect)
                 requiredItems
             )
 
-
         local moved =
             exportSource(
                 aspect,
                 toExport
             )
 
-
         if moved > 0 then
             return
         end
     end
 
-
-    -- --------------------------------------------------------
-    -- Source currently absent.
-    -- Ask AE2 to craft a small batch.
-    -- --------------------------------------------------------
+    -- Source missing:
+    -- request a small craft batch.
 
     requestSourceCraft(
         aspect,
         requiredItems
     )
+end
+
+
+-- ============================================================
+-- ASPECT FILTER HELPERS
+-- ============================================================
+
+local function isLow(aspect)
+
+    local current =
+        safeNumber(
+            currentEssentia[aspect],
+            0
+        )
+
+    local target =
+        safeNumber(
+            config[aspect]
+            and config[aspect].target
+            or 0,
+            0
+        )
+
+    return current < target
+end
+
+
+local function isActive(aspect)
+
+    local value =
+        status[aspect]
+
+    return
+        value == "FEEDING"
+        or value == "CRAFTING SOURCE"
+end
+
+
+local function isError(aspect)
+
+    local value =
+        status[aspect]
+
+    return
+        value == "NO SOURCE"
+        or value == "NO CRAFT"
+        or value == "CRAFT ERROR"
+        or value == "EXPORT ERROR"
+        or value == "EXPORT FAILED"
+        or value == "BAD YIELD"
+end
+
+
+local function isNew(aspect)
+
+    local fingerprint =
+        getSourceFingerprint(
+            aspect
+        )
+
+    return fingerprint == nil
+end
+
+
+-- ============================================================
+-- REBUILD FILTER
+-- ============================================================
+
+local function rebuildFilteredAspects()
+
+    filteredAspects = {}
+
+    for _, aspect in ipairs(aspects) do
+
+        local include = false
+
+        if filterMode == "ALL" then
+
+            include = true
+
+        elseif filterMode == "LOW" then
+
+            include =
+                isLow(aspect)
+
+        elseif filterMode == "ACTIVE" then
+
+            include =
+                isActive(aspect)
+
+        elseif filterMode == "ERRORS" then
+
+            include =
+                isError(aspect)
+
+        elseif filterMode == "NEW" then
+
+            include =
+                isNew(aspect)
+        end
+
+        if include then
+            table.insert(
+                filteredAspects,
+                aspect
+            )
+        end
+    end
+
+    local pageCount =
+        math.max(
+            1,
+            math.ceil(
+                #filteredAspects
+                / CARDS_PER_PAGE
+            )
+        )
+
+    if page > pageCount then
+        page = pageCount
+    end
+end
+
+
+-- ============================================================
+-- COUNTERS
+-- ============================================================
+
+local function getCounters()
+
+    local counters = {
+        total = #aspects,
+        configured = 0,
+        active = 0,
+        low = 0,
+        errors = 0,
+        new = 0
+    }
+
+    for _, aspect in ipairs(aspects) do
+
+        if not isNew(aspect) then
+            counters.configured =
+                counters.configured + 1
+        else
+            counters.new =
+                counters.new + 1
+        end
+
+        if isActive(aspect) then
+            counters.active =
+                counters.active + 1
+        end
+
+        if isLow(aspect) then
+            counters.low =
+                counters.low + 1
+        end
+
+        if isError(aspect) then
+            counters.errors =
+                counters.errors + 1
+        end
+    end
+
+    return counters
 end
 
 
@@ -1155,13 +1172,10 @@ local function refreshNetwork()
     fluids =
         scanFluids()
 
-
     allItemsIndex =
         scanAllItems()
 
-
     currentEssentia = {}
-
 
     for aspect, fluid in pairs(fluids) do
 
@@ -1172,25 +1186,19 @@ local function refreshNetwork()
             )
     end
 
-
     sourceAmounts = {}
 
-
     local knownAspects = {}
-
 
     for aspect in pairs(fluids) do
         knownAspects[aspect] = true
     end
 
-
     for aspect in pairs(config) do
         knownAspects[aspect] = true
     end
 
-
     aspects = {}
-
 
     for aspect in pairs(knownAspects) do
 
@@ -1202,11 +1210,9 @@ local function refreshNetwork()
         )
     end
 
-
     table.sort(
         aspects
     )
-
 
     for _, aspect in ipairs(aspects) do
 
@@ -1220,34 +1226,43 @@ local function refreshNetwork()
         )
     end
 
+    rebuildFilteredAspects()
 
     saveConfig()
-
 
     uiDirty = true
 end
 
 
 -- ============================================================
--- SCREEN
+-- DRAW HELPERS
 -- ============================================================
 
-local function clearScreen()
+local function setBackground(color)
+    gpu.setBackground(color)
+end
 
-    gpu.setBackground(
-        COLOR_BG
-    )
 
-    gpu.setForeground(
-        COLOR_WHITE
-    )
+local function setForeground(color)
+    gpu.setForeground(color)
+end
 
+
+local function fill(
+    x,
+    y,
+    w,
+    h,
+    color
+)
+
+    gpu.setBackground(color)
 
     gpu.fill(
-        1,
-        1,
-        width,
-        height,
+        x,
+        y,
+        w,
+        h,
         " "
     )
 end
@@ -1265,31 +1280,26 @@ local function drawText(
             value or ""
         )
 
-
     if x > width then
         return
     end
 
-
-    local maximum =
+    local maxLength =
         width - x + 1
 
-
-    if #value > maximum then
+    if #value > maxLength then
 
         value =
             value:sub(
                 1,
-                maximum
+                maxLength
             )
     end
 
-
-    gpu.setForeground(
+    setForeground(
         color
         or COLOR_WHITE
     )
-
 
     gpu.set(
         x,
@@ -1299,106 +1309,726 @@ local function drawText(
 end
 
 
-local function drawButton(
+local function drawCentered(
     x,
     y,
-    widthValue,
-    label,
-    active
+    w,
+    value,
+    color
 )
 
-    gpu.setBackground(
-        active
-        and 0x356A35
-        or COLOR_BUTTON
-    )
-
-    gpu.setForeground(
-        COLOR_WHITE
-    )
-
-
-    gpu.fill(
-        x,
-        y,
-        widthValue,
-        1,
-        " "
-    )
-
-
-    local textX =
-        x +
-        math.floor(
-            (widthValue - #label) / 2
+    value =
+        tostring(
+            value or ""
         )
 
+    if #value > w - 2 then
 
-    if textX < x + 1 then
-        textX = x + 1
+        value =
+            value:sub(
+                1,
+                w - 2
+            )
     end
 
+    local startX =
+        x
+        + math.floor(
+            (w - #value) / 2
+        )
 
-    gpu.set(
-        textX,
+    drawText(
+        startX,
         y,
-        label
-    )
-
-
-    gpu.setBackground(
-        COLOR_BG
+        value,
+        color
     )
 end
 
 
-local function drawFrame()
+local function drawButton(
+    x,
+    y,
+    w,
+    h,
+    label,
+    active,
+    color
+)
 
-    clearScreen()
+    local background =
+        active
+        and (color or COLOR_SELECTED)
+        or COLOR_PANEL_2
 
-
-    gpu.setBackground(
-        COLOR_HEADER
+    fill(
+        x,
+        y,
+        w,
+        h,
+        background
     )
 
+    drawCentered(
+        x,
+        y,
+        w,
+        label,
+        COLOR_WHITE
+    )
+end
+
+
+-- ============================================================
+-- STATUS VISUALS
+-- ============================================================
+
+local function getStatusColor(value)
+
+    if value == "OK" then
+        return COLOR_GREEN
+    end
+
+    if value == "FEEDING" then
+        return COLOR_ORANGE
+    end
+
+    if value == "CRAFTING SOURCE" then
+        return COLOR_BLUE
+    end
+
+    if value == "OFF" then
+        return COLOR_GREY
+    end
+
+    if value == "NO SOURCE"
+        or value == "NO CRAFT"
+        or value == "CRAFT ERROR"
+        or value == "EXPORT ERROR"
+        or value == "EXPORT FAILED"
+        or value == "BAD YIELD" then
+
+        return COLOR_RED
+    end
+
+    if value == "SOURCE SET" then
+        return COLOR_GREEN
+    end
+
+    return COLOR_YELLOW
+end
+
+
+local function getStatusLabel(aspect)
+
+    if isNew(aspect) then
+        return "NEW"
+    end
+
+    return status[aspect] or "-"
+end
+
+
+-- ============================================================
+-- FULL SCREEN
+-- ============================================================
+
+local function clearScreen()
+
+    setBackground(
+        COLOR_BG
+    )
+
+    setForeground(
+        COLOR_WHITE
+    )
 
     gpu.fill(
         1,
         1,
         width,
-        2,
+        height,
         " "
     )
+end
 
 
-    gpu.setBackground(
-        COLOR_BG
+-- ============================================================
+-- HEADER
+-- ============================================================
+
+local function drawHeader()
+
+    fill(
+        1,
+        1,
+        width,
+        2,
+        COLOR_PANEL_2
     )
-
 
     drawText(
         2,
         1,
-        "ESSENTIA MANAGER"
+        "ESSENTIA MANAGER",
+        COLOR_WHITE
     )
 
+    local counters =
+        getCounters()
+
+    drawText(
+        2,
+        2,
+        tostring(counters.total)
+        .. " aspects",
+        COLOR_GREY
+    )
+
+    drawText(
+        17,
+        2,
+        tostring(counters.configured)
+        .. " configured",
+        COLOR_GREY
+    )
+
+    drawText(
+        36,
+        2,
+        tostring(counters.active)
+        .. " active",
+        COLOR_ORANGE
+    )
+
+    drawText(
+        49,
+        2,
+        tostring(counters.low)
+        .. " low",
+        COLOR_YELLOW
+    )
+
+    drawText(
+        59,
+        2,
+        tostring(counters.errors)
+        .. " errors",
+        COLOR_RED
+    )
+
+    drawText(
+        math.max(
+            70,
+            width - 10
+        ),
+        1,
+        "AUTO",
+        COLOR_GREY
+    )
+end
+
+
+-- ============================================================
+-- FILTER BAR
+-- ============================================================
+
+local function drawFilters()
+
+    local counters =
+        getCounters()
+
+    local filterY = 3
+
+    local buttonWidth = 11
+
+    drawButton(
+        1,
+        filterY,
+        buttonWidth,
+        1,
+        "ALL "
+        .. counters.total,
+        filterMode == "ALL",
+        COLOR_SELECTED
+    )
+
+    drawButton(
+        13,
+        filterY,
+        buttonWidth,
+        1,
+        "LOW "
+        .. counters.low,
+        filterMode == "LOW",
+        COLOR_YELLOW
+    )
+
+    drawButton(
+        25,
+        filterY,
+        buttonWidth,
+        1,
+        "ACTIVE "
+        .. counters.active,
+        filterMode == "ACTIVE",
+        COLOR_ORANGE
+    )
+
+    drawButton(
+        37,
+        filterY,
+        buttonWidth,
+        1,
+        "ERROR "
+        .. counters.errors,
+        filterMode == "ERRORS",
+        COLOR_RED
+    )
+
+    drawButton(
+        49,
+        filterY,
+        buttonWidth,
+        1,
+        "NEW "
+        .. counters.new,
+        filterMode == "NEW",
+        COLOR_PURPLE
+    )
+
+    drawText(
+        width - 13,
+        filterY,
+        "R=refresh",
+        COLOR_GREY
+    )
+end
+
+
+-- ============================================================
+-- CARD GEOMETRY
+-- ============================================================
+
+local function getCardGeometry(
+    cardIndex
+)
+
+    local column =
+        (cardIndex - 1)
+        % CARD_COLUMNS
+
+    local row =
+        math.floor(
+            (cardIndex - 1)
+            / CARD_COLUMNS
+        )
+
+    local totalGap =
+        (CARD_COLUMNS - 1)
+        * CARD_GAP
+
+    local cardWidth =
+        math.floor(
+            (width - totalGap)
+            / CARD_COLUMNS
+        )
+
+    local x =
+        column
+        * (cardWidth + CARD_GAP)
+        + 1
+
+    local y =
+        HEADER_HEIGHT
+        + 2
+        + row
+        * (CARD_HEIGHT + 1)
+
+    return x, y, cardWidth
+end
+
+
+-- ============================================================
+-- PROGRESS BAR
+-- ============================================================
+
+local function drawProgressBar(
+    x,
+    y,
+    w,
+    current,
+    target,
+    color
+)
+
+    local ratio = 0
+
+    if target > 0 then
+
+        ratio =
+            current / target
+
+        if ratio > 1 then
+            ratio = 1
+        end
+
+        if ratio < 0 then
+            ratio = 0
+        end
+    end
+
+    local usableWidth =
+        math.max(
+            4,
+            w - 2
+        )
+
+    local filled =
+        math.floor(
+            usableWidth
+            * ratio
+        )
+
+    setBackground(
+        COLOR_PANEL_2
+    )
+
+    gpu.fill(
+        x,
+        y,
+        usableWidth,
+        1,
+        " "
+    )
+
+    if filled > 0 then
+
+        setBackground(
+            color
+        )
+
+        gpu.fill(
+            x,
+            y,
+            filled,
+            1,
+            " "
+        )
+    end
+
+    setBackground(
+        COLOR_BG
+    )
+end
+
+
+-- ============================================================
+-- CARD SIGNATURE
+-- ============================================================
+
+local function getCardSignature(
+    aspect
+)
+
+    local current =
+        safeNumber(
+            currentEssentia[aspect],
+            0
+        )
+
+    local target =
+        safeNumber(
+            config[aspect]
+            and config[aspect].target
+            or 0,
+            0
+        )
+
+    local source =
+        getSourceFingerprint(
+            aspect
+        )
+
+    return table.concat(
+        {
+            tostring(current),
+            tostring(target),
+            tostring(
+                status[aspect] or ""
+            ),
+            tostring(
+                source
+                and source.id
+                or ""
+            ),
+            tostring(
+                source
+                and source.dmg
+                or ""
+            ),
+            tostring(
+                config[aspect]
+                and config[aspect].enabled
+                or false
+            )
+        },
+        "|"
+    )
+end
+
+
+-- ============================================================
+-- DRAW CARD
+-- ============================================================
+
+local function drawCard(
+    aspect,
+    cardIndex
+)
+
+    local x, y, cardWidth =
+        getCardGeometry(
+            cardIndex
+        )
+
+
+    local current =
+        safeNumber(
+            currentEssentia[aspect],
+            0
+        )
+
+    local target =
+        safeNumber(
+            config[aspect]
+            and config[aspect].target
+            or 0,
+            0
+        )
+
+    local cardStatus =
+        getStatusLabel(
+            aspect
+        )
+
+    local statusColor =
+        getStatusColor(
+            status[aspect]
+        )
+
+
+    if isNew(aspect) then
+        statusColor = COLOR_PURPLE
+    end
+
+
+    if selected == aspect then
+
+        fill(
+            x,
+            y,
+            cardWidth,
+            CARD_HEIGHT,
+            COLOR_SELECTED
+        )
+
+    else
+
+        fill(
+            x,
+            y,
+            cardWidth,
+            CARD_HEIGHT,
+            COLOR_PANEL
+        )
+    end
+
+
+    -- Top line
+
+    drawText(
+        x + 1,
+        y,
+        prettyAspect(aspect),
+        COLOR_WHITE
+    )
+
+
+    local autoText =
+        config[aspect].enabled
+        and "ON"
+        or "OFF"
+
+
+    drawText(
+        x + cardWidth - 5,
+        y,
+        autoText,
+        config[aspect].enabled
+        and COLOR_GREEN
+        or COLOR_GREY
+    )
+
+
+    -- Current / Target
+
+    local valueText =
+        numberString(current)
+        .. "/"
+        .. numberString(target)
+
+    drawCentered(
+        x,
+        y + 1,
+        cardWidth,
+        valueText,
+        COLOR_WHITE
+    )
+
+
+    -- Progress
+
+    drawProgressBar(
+        x + 1,
+        y + 2,
+        cardWidth - 2,
+        current,
+        target,
+        statusColor
+    )
+
+
+    -- Status
+
+    drawCentered(
+        x,
+        y + 3,
+        cardWidth,
+        cardStatus,
+        statusColor
+    )
+end
+
+
+-- ============================================================
+-- DASHBOARD
+-- ============================================================
+
+local function drawDashboard()
+
+    if fullRedraw then
+
+        clearScreen()
+
+        drawHeader()
+
+        drawFilters()
+
+        lastCardSignatures = {}
+
+        fullRedraw = false
+    else
+
+        drawHeader()
+
+        drawFilters()
+    end
+
+
+    local first =
+        (page - 1)
+        * CARDS_PER_PAGE
+        + 1
+
+    local last =
+        math.min(
+            #filteredAspects,
+            first + CARDS_PER_PAGE - 1
+        )
+
+
+    local newSignatures = {}
+
+
+    for index = first, last do
+
+        local cardIndex =
+            index - first + 1
+
+        local aspect =
+            filteredAspects[index]
+
+        local signature =
+            getCardSignature(
+                aspect
+            )
+
+        newSignatures[cardIndex] =
+            signature
+
+
+        if lastCardSignatures[cardIndex]
+            ~= signature
+            or fullRedraw then
+
+            drawCard(
+                aspect,
+                cardIndex
+            )
+        end
+    end
+
+
+    for index = last - first + 2,
+        CARDS_PER_PAGE do
+
+        if lastCardSignatures[index] then
+
+            local x, y, cardWidth =
+                getCardGeometry(
+                    index
+                )
+
+            fill(
+                x,
+                y,
+                cardWidth,
+                CARD_HEIGHT,
+                COLOR_BG
+            )
+        end
+    end
+
+
+    lastCardSignatures =
+        newSignatures
+
+
+    -- Footer
 
     local pageCount =
         math.max(
             1,
             math.ceil(
-                #aspects / ROWS
+                #filteredAspects
+                / CARDS_PER_PAGE
             )
         )
 
+    fill(
+        1,
+        height - 1,
+        width,
+        2,
+        COLOR_PANEL_2
+    )
+
 
     drawText(
-        math.max(
-            30,
-            width - 18
-        ),
-        1,
-        "PAGE "
+        2,
+        height - 1,
+        "Page "
         .. page
         .. "/"
         .. pageCount,
@@ -1406,476 +2036,51 @@ local function drawFrame()
     )
 
 
-    gpu.setBackground(
-        COLOR_HEADER
-    )
-
-
-    gpu.fill(
-        1,
-        3,
-        width,
-        1,
-        " "
-    )
-
-
-    gpu.setBackground(
-        COLOR_BG
-    )
-
-
     drawText(
-        2,
-        3,
-        "ASPECT"
-    )
-
-    drawText(
-        14,
-        3,
-        "CURRENT"
-    )
-
-    drawText(
-        24,
-        3,
-        "TARGET"
-    )
-
-    drawText(
-        34,
-        3,
-        "NEED"
-    )
-
-    drawText(
-        44,
-        3,
-        "SOURCE"
-    )
-
-    drawText(
-        math.max(
-            60,
-            width - 20
-        ),
-        3,
-        "STATUS"
+        15,
+        height - 1,
+        "Click card: settings",
+        COLOR_GREY
     )
 
 
-    drawButton(
-        1,
-        height - 2,
-        10,
-        "< PREV",
-        page > 1
-    )
+    if page > 1 then
+
+        drawButton(
+            width - 22,
+            height - 1,
+            9,
+            1,
+            "< PREV",
+            true
+        )
+    end
 
 
-    drawButton(
-        12,
-        height - 2,
-        10,
-        "NEXT >",
-        true
-    )
+    if page < pageCount then
 
-
-    drawButton(
-        23,
-        height - 2,
-        10,
-        "RESCAN",
-        false
-    )
+        drawButton(
+            width - 12,
+            height - 1,
+            10,
+            1,
+            "NEXT >",
+            true
+        )
+    end
 
 
     drawText(
         2,
         height,
-        "Click row = configure",
+        "Q quit",
         COLOR_GREY
     )
-
-
-    drawText(
-        width - 8,
-        height,
-        "Q=quit",
-        COLOR_GREY
-    )
-
-
-    fullRedraw = false
 end
 
 
 -- ============================================================
--- ROW
--- ============================================================
-
-local function getRowSignature(aspect)
-
-    local current =
-        ensureConfig(
-            aspect
-        )
-
-
-    local currentEss =
-        safeNumber(
-            currentEssentia[aspect],
-            0
-        )
-
-
-    local target =
-        safeNumber(
-            current.target,
-            0
-        )
-
-
-    local need =
-        math.max(
-            0,
-            target - currentEss
-        )
-
-
-    local fingerprint =
-        getSourceFingerprint(
-            aspect
-        )
-
-
-    local sourceText =
-        "-"
-
-
-    if fingerprint then
-
-        sourceText =
-            fingerprint.id
-
-
-        if #sourceText > 18 then
-
-            sourceText =
-                sourceText:sub(
-                    1,
-                    18
-                )
-        end
-    end
-
-
-    return table.concat(
-        {
-            prettyAspect(aspect),
-
-            tostring(currentEss),
-
-            tostring(target),
-
-            tostring(need),
-
-            sourceText,
-
-            status[aspect] or "-",
-
-            current.enabled
-            and "ON"
-            or "OFF"
-        },
-        "|"
-    )
-end
-
-
-local function drawRow(
-    aspect,
-    rowIndex
-)
-
-    local rowY =
-        4 + rowIndex - 1
-
-
-    if selected == aspect then
-
-        gpu.setBackground(
-            COLOR_SELECTED
-        )
-
-    else
-
-        gpu.setBackground(
-            COLOR_BG
-        )
-    end
-
-
-    gpu.fill(
-        1,
-        rowY,
-        width,
-        1,
-        " "
-    )
-
-
-    gpu.setBackground(
-        COLOR_BG
-    )
-
-
-    local current =
-        ensureConfig(
-            aspect
-        )
-
-
-    local currentEss =
-        safeNumber(
-            currentEssentia[aspect],
-            0
-        )
-
-
-    local target =
-        safeNumber(
-            current.target,
-            0
-        )
-
-
-    local need =
-        math.max(
-            0,
-            target - currentEss
-        )
-
-
-    local fingerprint =
-        getSourceFingerprint(
-            aspect
-        )
-
-
-    local sourceText =
-        "-"
-
-
-    if fingerprint then
-
-        sourceText =
-            fingerprint.id
-
-
-        if #sourceText > 18 then
-
-            sourceText =
-                sourceText:sub(
-                    1,
-                    18
-                )
-        end
-    end
-
-
-    local currentStatus =
-        status[aspect]
-        or "-"
-
-
-    drawText(
-        2,
-        rowY,
-        prettyAspect(aspect)
-    )
-
-
-    drawText(
-        14,
-        rowY,
-        numberString(
-            currentEss
-        )
-    )
-
-
-    drawText(
-        24,
-        rowY,
-        numberString(
-            target
-        )
-    )
-
-
-    drawText(
-        34,
-        rowY,
-        numberString(
-            need
-        )
-    )
-
-
-    drawText(
-        44,
-        rowY,
-        sourceText
-    )
-
-
-    local statusColor =
-        COLOR_YELLOW
-
-
-    if currentStatus == "OK"
-        or currentStatus == "FEEDING" then
-
-        statusColor =
-            COLOR_GREEN
-
-    elseif currentStatus
-        == "CRAFTING SOURCE" then
-
-        statusColor =
-            COLOR_BLUE
-
-    elseif currentStatus
-        == "NO SOURCE"
-        or currentStatus
-        == "NO CRAFT"
-        or currentStatus
-        == "CRAFT ERROR"
-        or currentStatus
-        == "EXPORT ERROR"
-        or currentStatus
-        == "EXPORT FAILED" then
-
-        statusColor =
-            COLOR_RED
-    end
-
-
-    drawText(
-        math.max(
-            60,
-            width - 20
-        ),
-        rowY,
-        currentStatus,
-        statusColor
-    )
-
-
-    drawText(
-        math.max(
-            76,
-            width - 6
-        ),
-        rowY,
-        current.enabled
-        and "ON"
-        or "OFF",
-
-        current.enabled
-        and COLOR_GREEN
-        or COLOR_GREY
-    )
-end
-
-
-local function drawTable()
-
-    if fullRedraw then
-        drawFrame()
-    end
-
-
-    local first =
-        (page - 1)
-        * ROWS
-        + 1
-
-
-    local last =
-        math.min(
-            #aspects,
-            first + ROWS - 1
-        )
-
-
-    local currentRows = {}
-
-
-    for index = first, last do
-
-        local aspect =
-            aspects[index]
-
-
-        local rowIndex =
-            index - first + 1
-
-
-        currentRows[rowIndex] =
-            getRowSignature(
-                aspect
-            )
-
-
-        if lastRows[rowIndex]
-            ~= currentRows[rowIndex]
-            or fullRedraw then
-
-            drawRow(
-                aspect,
-                rowIndex
-            )
-        end
-    end
-
-
-    for rowIndex =
-        #currentRows + 1,
-        ROWS do
-
-        if lastRows[rowIndex] then
-
-            local rowY =
-                4 + rowIndex - 1
-
-
-            gpu.setBackground(
-                COLOR_BG
-            )
-
-
-            gpu.fill(
-                1,
-                rowY,
-                width,
-                1,
-                " "
-            )
-        end
-    end
-
-
-    lastRows =
-        currentRows
-end
-
-
--- ============================================================
--- NUMBER INPUT
+-- EDITOR NUMBER INPUT
 -- ============================================================
 
 local function readNumber(
@@ -1885,29 +2090,19 @@ local function readNumber(
 
     term.clear()
 
-
     print(
         promptText
     )
 
-
-    if default ~= nil then
-
-        print(
-            "Current: "
-            .. tostring(
-                default
-            )
-        )
-    end
-
+    print(
+        "Current: "
+        .. tostring(default)
+    )
 
     io.write("> ")
 
-
     local raw =
         io.read()
-
 
     if not raw
         or raw == "" then
@@ -1915,74 +2110,23 @@ local function readNumber(
         return default
     end
 
-
     local value =
         tonumber(raw)
 
-
-    if value == nil then
+    if not value then
         return default
     end
-
 
     if value < 0 then
         value = 0
     end
 
-
-    return math.floor(
-        value
-    )
+    return math.floor(value)
 end
 
 
 -- ============================================================
--- SOURCE SCANNING
--- ============================================================
-
-local function assignScannerSource(
-    aspect
-)
-
-    local stack =
-        scanSourceChest()
-
-
-    if not stack then
-
-        status[aspect] =
-            "NO SCAN ITEM"
-
-        return false
-    end
-
-
-    local current =
-        ensureConfig(
-            aspect
-        )
-
-
-    current.sourceFingerprint =
-        makeExportFingerprint(
-            stack.name,
-            stack.damage
-        )
-
-
-    saveConfig()
-
-
-    status[aspect] =
-        "SOURCE SET"
-
-
-    return true
-end
-
-
--- ============================================================
--- ASPECT EDITOR
+-- EDITOR
 -- ============================================================
 
 local function editAspect(
@@ -2006,16 +2150,19 @@ local function editAspect(
                 0
             )
 
-
         local available =
             safeNumber(
                 sourceAmounts[aspect],
                 0
             )
 
-
         local fingerprint =
             getSourceFingerprint(
+                aspect
+            )
+
+        local currentStatus =
+            getStatusLabel(
                 aspect
             )
 
@@ -2023,7 +2170,7 @@ local function editAspect(
         drawText(
             2,
             2,
-            "ESSENTIA CONFIGURATION",
+            "ESSENTIA SETTINGS",
             COLOR_BLUE
         )
 
@@ -2031,18 +2178,24 @@ local function editAspect(
         drawText(
             2,
             4,
-            "Aspect: "
-            .. prettyAspect(
+            prettyAspect(
                 aspect
-            )
+            ),
+            COLOR_WHITE
         )
 
 
         drawText(
             2,
             6,
-            "Current essentia: "
-            .. numberString(
+            "Current:",
+            COLOR_GREY
+        )
+
+        drawText(
+            18,
+            6,
+            numberString(
                 currentEss
             )
             .. " mB"
@@ -2052,34 +2205,62 @@ local function editAspect(
         drawText(
             2,
             7,
-            "Source in ME: "
-            .. numberString(
-                available
+            "Target:",
+            COLOR_GREY
+        )
+
+        drawText(
+            18,
+            7,
+            numberString(
+                current.target
             )
+            .. " mB"
         )
 
 
         drawText(
             2,
-            9,
-            "Source:"
+            8,
+            "Need:",
+            COLOR_GREY
+        )
+
+        drawText(
+            18,
+            8,
+            numberString(
+                math.max(
+                    0,
+                    current.target
+                    - currentEss
+                )
+            )
+            .. " mB"
+        )
+
+
+        drawText(
+            2,
+            10,
+            "Source:",
+            COLOR_GREY
         )
 
 
         if fingerprint then
 
             drawText(
+                18,
                 10,
-                9,
                 fingerprint.id,
                 COLOR_GREEN
             )
 
-
             drawText(
-                10,
-                10,
-                "damage = "
+                18,
+                11,
+                "damage "
                 .. tostring(
                     fingerprint.dmg
                 ),
@@ -2089,41 +2270,42 @@ local function editAspect(
         else
 
             drawText(
+                18,
                 10,
-                9,
-                "NOT SET",
-                COLOR_RED
+                "NOT CONFIGURED",
+                COLOR_PURPLE
             )
         end
 
 
         drawText(
             2,
-            12,
-            "Essentia / item: "
-            .. tostring(
-                current.essentiaPerItem
-            )
+            13,
+            "Source in ME:",
+            COLOR_GREY
         )
 
-
         drawText(
-            2,
+            18,
             13,
-            "Target: "
-            .. tostring(
-                current.target
+            numberString(
+                available
             )
-            .. " mB"
         )
 
 
         drawText(
             2,
             14,
-            "Trigger: "
-            .. tostring(
-                current.trigger
+            "Essentia / item:",
+            COLOR_GREY
+        )
+
+        drawText(
+            18,
+            14,
+            tostring(
+                current.essentiaPerItem
             )
             .. " mB"
         )
@@ -2132,25 +2314,41 @@ local function editAspect(
         drawText(
             2,
             15,
-            "Auto refill: "
-            .. (
-                current.enabled
-                and "ON"
-                or "OFF"
-            ),
-            current.enabled
-            and COLOR_GREEN
-            or COLOR_GREY
+            "Trigger:",
+            COLOR_GREY
+        )
+
+        drawText(
+            18,
+            15,
+            tostring(
+                current.trigger
+            )
+            .. " mB"
         )
 
 
         drawText(
             2,
-            17,
-            "Scanner slot: "
-            .. tostring(
-                SOURCE_SCAN_SLOT
-            ),
+            16,
+            "Status:",
+            COLOR_GREY
+        )
+
+        drawText(
+            18,
+            16,
+            currentStatus,
+            getStatusColor(
+                status[aspect]
+            )
+        )
+
+
+        drawText(
+            2,
+            18,
+            "Scanner:",
             COLOR_GREY
         )
 
@@ -2158,23 +2356,28 @@ local function editAspect(
         if scannerItem then
 
             drawText(
-                2,
                 18,
-                "Scanner: "
-                .. scannerItem.name
-                .. " : "
+                18,
+                scannerItem.name,
+                COLOR_GREEN
+            )
+
+            drawText(
+                18,
+                19,
+                "damage "
                 .. tostring(
                     scannerItem.damage
                 ),
-                COLOR_GREEN
+                COLOR_GREY
             )
 
         else
 
             drawText(
-                2,
                 18,
-                "Scanner: EMPTY",
+                18,
+                "EMPTY",
                 COLOR_RED
             )
         end
@@ -2182,60 +2385,65 @@ local function editAspect(
 
         drawButton(
             2,
-            20,
-            20,
+            21,
+            18,
+            1,
             "SCAN SOURCE",
             false
         )
 
-
         drawButton(
-            24,
-            20,
-            18,
-            "SET TARGET",
-            false
-        )
-
-
-        drawButton(
-            44,
-            20,
-            18,
-            "SET TRIGGER",
-            false
-        )
-
-
-        drawButton(
-            2,
             22,
-            20,
-            "SET YIELD",
+            21,
+            15,
+            1,
+            "TARGET",
+            false
+        )
+
+        drawButton(
+            39,
+            21,
+            15,
+            1,
+            "TRIGGER",
+            false
+        )
+
+        drawButton(
+            56,
+            21,
+            15,
+            1,
+            "YIELD",
             false
         )
 
 
         drawButton(
-            24,
             22,
+            23,
             18,
-            "TOGGLE AUTO",
+            1,
             current.enabled
+            and "AUTO: ON"
+            or "AUTO: OFF",
+            current.enabled,
+            COLOR_GREEN
         )
 
-
         drawButton(
-            44,
-            22,
+            42,
+            23,
             18,
+            1,
             "BACK",
             false
         )
 
 
         local eventName,
-              eventAddress,
+              address,
               x,
               y =
             event.pull(
@@ -2243,18 +2451,37 @@ local function editAspect(
             )
 
 
-        if y == 20
+        if y == 21
             and x >= 2
-            and x <= 22 then
+            and x <= 20 then
 
-            assignScannerSource(
-                aspect
-            )
+            local scanned =
+                scanSourceChest()
 
 
-        elseif y == 20
-            and x >= 24
-            and x <= 42 then
+            if scanned then
+
+                current.sourceFingerprint =
+                    makeExportFingerprint(
+                        scanned.name,
+                        scanned.damage
+                    )
+
+                status[aspect] =
+                    "SOURCE SET"
+
+                saveConfig()
+
+            else
+
+                status[aspect] =
+                    "NO SCAN ITEM"
+            end
+
+
+        elseif y == 21
+            and x >= 22
+            and x <= 37 then
 
             current.target =
                 readNumber(
@@ -2265,9 +2492,9 @@ local function editAspect(
             saveConfig()
 
 
-        elseif y == 20
-            and x >= 44
-            and x <= 62 then
+        elseif y == 21
+            and x >= 39
+            and x <= 54 then
 
             current.trigger =
                 readNumber(
@@ -2278,9 +2505,9 @@ local function editAspect(
             saveConfig()
 
 
-        elseif y == 22
-            and x >= 2
-            and x <= 22 then
+        elseif y == 21
+            and x >= 56
+            and x <= 71 then
 
             current.essentiaPerItem =
                 readNumber(
@@ -2288,49 +2515,40 @@ local function editAspect(
                     current.essentiaPerItem
                 )
 
-
             if current.essentiaPerItem <= 0 then
-
-                current.essentiaPerItem =
-                    1
+                current.essentiaPerItem = 1
             end
-
 
             saveConfig()
 
 
-        elseif y == 22
-            and x >= 24
-            and x <= 42 then
+        elseif y == 23
+            and x >= 22
+            and x <= 40 then
 
             current.enabled =
                 not current.enabled
 
-
             saveConfig()
 
 
-        elseif y == 22
-            and x >= 44
-            and x <= 62 then
+        elseif y == 23
+            and x >= 42
+            and x <= 60 then
 
             return
         end
-
-
-        uiDirty = true
     end
 end
 
 
 -- ============================================================
--- START
+-- INITIALIZATION
 -- ============================================================
 
 loadConfig()
 
 scanSourceChest()
-
 
 log(
     "[EssentiaManager] Starting..."
@@ -2354,11 +2572,10 @@ if not okStart then
 end
 
 
-drawFrame()
+rebuildFilteredAspects()
 
-drawTable()
-
-uiDirty = false
+fullRedraw = true
+uiDirty = true
 
 
 -- ============================================================
@@ -2371,7 +2588,9 @@ while true do
         computer.uptime()
 
 
-    -- Refresh the entire ME snapshot periodically.
+    -- --------------------------------------------------------
+    -- Network refresh
+    -- --------------------------------------------------------
 
     if now - lastRefresh
         >= REFRESH_INTERVAL then
@@ -2380,7 +2599,6 @@ while true do
             pcall(
                 refreshNetwork
             )
-
 
         if not ok then
 
@@ -2392,13 +2610,16 @@ while true do
             )
         end
 
-
         lastRefresh =
             now
+
+        uiDirty = true
     end
 
 
-    -- Refresh scanner chest separately.
+    -- --------------------------------------------------------
+    -- Scanner update
+    -- --------------------------------------------------------
 
     if now - lastScannerScan
         >= 1.0 then
@@ -2410,19 +2631,23 @@ while true do
     end
 
 
-    -- Only update changed rows.
+    -- --------------------------------------------------------
+    -- GUI
+    -- --------------------------------------------------------
 
     if uiDirty then
 
-        drawTable()
+        drawDashboard()
 
         uiDirty = false
     end
 
 
-    -- Input.
+    -- --------------------------------------------------------
+    -- INPUT
+    -- --------------------------------------------------------
 
-    local name,
+    local eventName,
           address,
           a,
           b =
@@ -2431,106 +2656,218 @@ while true do
         )
 
 
-    if name == "touch" then
+    if eventName == "touch" then
 
         local x = a
         local y = b
 
 
-        if y >= height - 2
-            and x >= 1
-            and x <= 10 then
+        -- ----------------------------------------------------
+        -- Filter buttons
+        -- ----------------------------------------------------
 
-            if page > 1 then
+        if y == 3 then
 
-                page =
-                    page - 1
+            if x >= 1 and x < 12 then
 
-                lastRows = {}
+                filterMode = "ALL"
+                page = 1
+
+                lastCardSignatures = {}
 
                 fullRedraw = true
+                uiDirty = true
 
+
+            elseif x >= 13 and x < 24 then
+
+                filterMode = "LOW"
+                page = 1
+
+                lastCardSignatures = {}
+
+                fullRedraw = true
+                uiDirty = true
+
+
+            elseif x >= 25 and x < 36 then
+
+                filterMode = "ACTIVE"
+                page = 1
+
+                lastCardSignatures = {}
+
+                fullRedraw = true
+                uiDirty = true
+
+
+            elseif x >= 37 and x < 48 then
+
+                filterMode = "ERRORS"
+                page = 1
+
+                lastCardSignatures = {}
+
+                fullRedraw = true
+                uiDirty = true
+
+
+            elseif x >= 49 and x < 60 then
+
+                filterMode = "NEW"
+                page = 1
+
+                lastCardSignatures = {}
+
+                fullRedraw = true
                 uiDirty = true
             end
 
 
-        elseif y >= height - 2
-            and x >= 12
-            and x <= 21 then
+        -- ----------------------------------------------------
+        -- Cards
+        -- ----------------------------------------------------
+
+        elseif y >= HEADER_HEIGHT + 2
+            and y <
+                HEADER_HEIGHT
+                + 2
+                + CARD_ROWS
+                * (CARD_HEIGHT + 1) then
+
+            local cardWidth =
+                math.floor(
+                    (
+                        width
+                        - (CARD_COLUMNS - 1)
+                        * CARD_GAP
+                    )
+                    / CARD_COLUMNS
+                )
+
+
+            local relativeY =
+                y - (HEADER_HEIGHT + 2)
+
+
+            local row =
+                math.floor(
+                    relativeY
+                    / (CARD_HEIGHT + 1)
+                )
+
+
+            local column =
+                math.floor(
+                    (
+                        x - 1
+                    )
+                    / (
+                        cardWidth
+                        + CARD_GAP
+                    )
+                )
+
+
+            if column >= 0
+                and column < CARD_COLUMNS
+                and row >= 0
+                and row < CARD_ROWS then
+
+                local cardIndex =
+                    row
+                    * CARD_COLUMNS
+                    + column
+                    + 1
+
+
+                local filteredIndex =
+                    (
+                        page - 1
+                    )
+                    * CARDS_PER_PAGE
+                    + cardIndex
+
+
+                local aspect =
+                    filteredAspects[
+                        filteredIndex
+                    ]
+
+
+                if aspect then
+
+                    selected =
+                        aspect
+
+                    editAspect(
+                        aspect
+                    )
+
+                    selected = nil
+
+                    lastCardSignatures = {}
+
+                    fullRedraw = true
+                    uiDirty = true
+                end
+            end
+
+
+        -- ----------------------------------------------------
+        -- Footer
+        -- ----------------------------------------------------
+
+        elseif y >= height - 1 then
 
             local pageCount =
                 math.max(
                     1,
                     math.ceil(
-                        #aspects / ROWS
+                        #filteredAspects
+                        / CARDS_PER_PAGE
                     )
                 )
 
 
-            if page < pageCount then
+            if x >= width - 22
+                and x < width - 13
+                and page > 1 then
+
+                page =
+                    page - 1
+
+                lastCardSignatures = {}
+
+                fullRedraw = true
+                uiDirty = true
+
+
+            elseif x >= width - 12
+                and page < pageCount then
 
                 page =
                     page + 1
 
-                lastRows = {}
+                lastCardSignatures = {}
 
                 fullRedraw = true
-
-                uiDirty = true
-            end
-
-
-        elseif y >= height - 2
-            and x >= 23
-            and x <= 32 then
-
-            lastRefresh = 0
-
-            uiDirty = true
-
-
-        elseif y >= 4
-            and y < 4 + ROWS then
-
-            local index =
-                (page - 1)
-                * ROWS
-                + y - 3
-
-
-            if aspects[index] then
-
-                selected =
-                    aspects[index]
-
-
-                editAspect(
-                    selected
-                )
-
-
-                selected = nil
-
-                lastRows = {}
-
-                fullRedraw = true
-
                 uiDirty = true
             end
         end
 
 
-    elseif name == "key_down" then
+    elseif eventName == "key_down" then
 
         local char = a
 
 
         if char == string.byte("q") then
+
             break
-        end
 
 
-        if char == string.byte("r") then
+        elseif char == string.byte("r") then
 
             lastRefresh = 0
 
