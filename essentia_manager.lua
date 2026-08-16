@@ -43,17 +43,16 @@ local inventory = component.inventory_controller
 -- ============================================================
 
 -- Chest used for selecting source items.
--- Put the desired item into this chest, slot 1.
+-- Put the desired source item into this chest, slot 1.
 
 local SOURCE_SCAN_SIDE = sides.north
 local SOURCE_SCAN_SLOT = 1
 
 
--- ME Interface output.
--- The target chest is below the ME Interface.
+-- ME Interface output direction.
+-- The destination inventory may use any available slot.
 
 local EXPORT_DIRECTION = "DOWN"
-local EXPORT_SLOT = 1
 
 
 -- ============================================================
@@ -62,8 +61,8 @@ local EXPORT_SLOT = 1
 
 local CONFIG_FILE = "/home/essentia_manager.cfg"
 
--- getFluidsInNetwork() returns values in 128-unit blocks
--- for the essentia representation used in this setup.
+-- getFluidsInNetwork() returns essentia in 128-unit values
+-- in this setup.
 
 local ESSENTIA_SCALE = 128
 
@@ -73,18 +72,18 @@ local DEFAULT_TRIGGER = 512
 local DEFAULT_YIELD = 1
 
 
--- How often the whole ME network is refreshed.
+-- Full ME network refresh interval.
 
 local REFRESH_INTERVAL = 1.0
 
 
--- How often we are allowed to submit another crafting request
--- for the same source item.
+-- Minimum time between repeated source-crafting requests
+-- for the same aspect.
 
 local CRAFT_RECHECK_INTERVAL = 10
 
 
--- Safety limit for a single export operation.
+-- Safety limit for one export operation.
 
 local MAX_EXPORT_PER_RUN = 4096
 
@@ -138,7 +137,7 @@ local fluids = {}
 
 local currentEssentia = {}
 
--- Whole ME item index.
+-- Complete ME item index.
 -- key = "name|damage"
 -- value = total amount
 
@@ -172,16 +171,6 @@ local function safeNumber(value, fallback)
     end
 
     return number
-end
-
-
-local function normalizeAspect(value)
-
-    if not value then
-        return nil
-    end
-
-    return tostring(value):lower()
 end
 
 
@@ -252,8 +241,6 @@ end
 -- ITEM IDENTIFIERS
 -- ============================================================
 
--- Internal key used by the complete ME item index.
-
 local function itemKey(name, damage)
 
     return
@@ -268,8 +255,6 @@ local function itemKey(name, damage)
 end
 
 
--- ME search filter.
-
 local function makeItemFilter(fingerprint)
 
     return {
@@ -278,8 +263,6 @@ local function makeItemFilter(fingerprint)
     }
 end
 
-
--- exportItem() fingerprint.
 
 local function makeExportFingerprint(
     name,
@@ -351,9 +334,7 @@ local function ensureConfig(aspect)
     end
 
 
-    -- --------------------------------------------------------
-    -- Backward compatibility with the previous config format.
-    -- --------------------------------------------------------
+    -- Backward compatibility with the old config format.
 
     if not current.sourceFingerprint then
 
@@ -673,7 +654,9 @@ end
 local function getSourceFingerprint(aspect)
 
     local current =
-        ensureConfig(aspect)
+        ensureConfig(
+            aspect
+        )
 
 
     if not current.sourceFingerprint then
@@ -863,12 +846,22 @@ local function requestSourceCraft(
         )
 
 
+    -- Small batches avoid filling the crafting queue
+    -- with a huge number of unnecessary requests.
+
+    local requestAmount =
+        math.min(
+            amount,
+            8
+        )
+
+
     local ok, request =
         pcall(
             function()
 
                 return craft.request(
-                    amount,
+                    requestAmount,
                     true
                 )
 
@@ -880,23 +873,7 @@ local function requestSourceCraft(
         now
 
 
-    if not ok then
-
-        status[aspect] =
-            "CRAFT ERROR"
-
-        log(
-            "[EssentiaManager] Craft request error for "
-            .. prettyAspect(aspect)
-            .. ": "
-            .. tostring(request)
-        )
-
-        return false
-    end
-
-
-    if not request then
+    if not ok or not request then
 
         status[aspect] =
             "CRAFT ERROR"
@@ -972,17 +949,15 @@ local function exportSource(
         end
 
 
+        -- No destination slot:
+        -- the ME Interface chooses a suitable free slot.
+
         local ok, result =
             pcall(
                 interface.exportItem,
-
                 fingerprint,
-
                 EXPORT_DIRECTION,
-
-                remaining,
-
-                EXPORT_SLOT
+                remaining
             )
 
 
@@ -991,16 +966,7 @@ local function exportSource(
             status[aspect] =
                 "EXPORT ERROR"
 
-
-            log(
-                "[EssentiaManager] Export error for "
-                .. prettyAspect(aspect)
-                .. ": "
-                .. tostring(result)
-            )
-
-
-            break
+            return movedTotal
         end
 
 
@@ -1018,7 +984,6 @@ local function exportSource(
         elseif type(result) == "number" then
 
             moved = result
-
         end
 
 
@@ -1055,7 +1020,9 @@ end
 local function maintainAspect(aspect)
 
     local current =
-        ensureConfig(aspect)
+        ensureConfig(
+            aspect
+        )
 
 
     if not current.enabled then
@@ -1133,8 +1100,8 @@ local function maintainAspect(aspect)
 
 
     -- --------------------------------------------------------
-    -- First priority:
-    -- use source items already in ME.
+    -- Source already exists in ME.
+    -- Feed it immediately.
     -- --------------------------------------------------------
 
     local available =
@@ -1168,12 +1135,8 @@ local function maintainAspect(aspect)
 
 
     -- --------------------------------------------------------
-    -- Source is absent.
-    --
-    -- Request a source craft.
-    -- We do not use CraftingStatus to determine success.
-    -- The next network scan will tell us whether the item
-    -- actually appeared in ME.
+    -- Source currently absent.
+    -- Ask AE2 to craft a small batch.
     -- --------------------------------------------------------
 
     requestSourceCraft(
@@ -1365,8 +1328,8 @@ local function drawButton(
 
 
     local textX =
-        x
-        + math.floor(
+        x +
+        math.floor(
             (widthValue - #label) / 2
         )
 
@@ -2368,6 +2331,7 @@ loadConfig()
 
 scanSourceChest()
 
+
 log(
     "[EssentiaManager] Starting..."
 )
@@ -2383,7 +2347,9 @@ if not okStart then
 
     log(
         "[EssentiaManager] Initial refresh error: "
-        .. tostring(startError)
+        .. tostring(
+            startError
+        )
     )
 end
 
@@ -2405,16 +2371,7 @@ while true do
         computer.uptime()
 
 
-    -- --------------------------------------------------------
-    -- Whole-network refresh.
-    -- Two main ME queries:
-    --
-    -- getFluidsInNetwork()
-    -- getItemsInNetwork({})
-    --
-    -- Individual craftable query only happens when a source
-    -- item is actually missing and needs to be crafted.
-    -- --------------------------------------------------------
+    -- Refresh the entire ME snapshot periodically.
 
     if now - lastRefresh
         >= REFRESH_INTERVAL then
@@ -2438,15 +2395,10 @@ while true do
 
         lastRefresh =
             now
-
-
-        uiDirty = true
     end
 
 
-    -- --------------------------------------------------------
-    -- Scanner chest.
-    -- --------------------------------------------------------
+    -- Refresh scanner chest separately.
 
     if now - lastScannerScan
         >= 1.0 then
@@ -2458,9 +2410,7 @@ while true do
     end
 
 
-    -- --------------------------------------------------------
-    -- Draw only when needed.
-    -- --------------------------------------------------------
+    -- Only update changed rows.
 
     if uiDirty then
 
@@ -2470,9 +2420,7 @@ while true do
     end
 
 
-    -- --------------------------------------------------------
-    -- Input
-    -- --------------------------------------------------------
+    -- Input.
 
     local name,
           address,
@@ -2488,8 +2436,6 @@ while true do
         local x = a
         local y = b
 
-
-        -- Previous page
 
         if y >= height - 2
             and x >= 1
@@ -2508,8 +2454,6 @@ while true do
             end
 
 
-        -- Next page
-
         elseif y >= height - 2
             and x >= 12
             and x <= 21 then
@@ -2518,8 +2462,7 @@ while true do
                 math.max(
                     1,
                     math.ceil(
-                        #aspects
-                        / ROWS
+                        #aspects / ROWS
                     )
                 )
 
@@ -2537,8 +2480,6 @@ while true do
             end
 
 
-        -- Rescan
-
         elseif y >= height - 2
             and x >= 23
             and x <= 32 then
@@ -2547,8 +2488,6 @@ while true do
 
             uiDirty = true
 
-
-        -- Table row
 
         elseif y >= 4
             and y < 4 + ROWS then
