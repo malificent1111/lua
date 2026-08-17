@@ -43,7 +43,7 @@ local inventory = component.inventory_controller
 
 -- Put the source item into this chest, slot 1.
 
-local SOURCE_SCAN_SIDE = sides.north
+local SOURCE_SCAN_SIDE = sides.east
 local SOURCE_SCAN_SLOT = 1
 
 
@@ -71,6 +71,8 @@ local CRAFT_RECHECK_INTERVAL = 10
 
 local MAX_EXPORT_PER_RUN = 4096
 
+local MAX_FEED_BATCH = 8
+local FEED_RECHECK_INTERVAL = 3
 
 -- ============================================================
 -- UI CONFIGURATION
@@ -162,6 +164,7 @@ local fullRedraw = true
 
 local lastCardSignatures = {}
 
+local lastFeedTime = {}
 
 -- ============================================================
 -- BASIC HELPERS
@@ -1002,30 +1005,18 @@ local function maintainAspect(aspect)
     local current =
         ensureConfig(aspect)
 
-
     if not current.enabled then
-
-        status[aspect] =
-            "OFF"
-
+        status[aspect] = "OFF"
         return
     end
-
 
     local fingerprint =
-        getSourceFingerprint(
-            aspect
-        )
-
+        getSourceFingerprint(aspect)
 
     if not fingerprint then
-
-        status[aspect] =
-            "NO SOURCE"
-
+        status[aspect] = "NO SOURCE"
         return
     end
-
 
     local currentEss =
         safeNumber(
@@ -1033,26 +1024,19 @@ local function maintainAspect(aspect)
             0
         )
 
-
     local target =
         safeNumber(
             current.target,
             0
         )
 
-
     if currentEss >= target then
-
-        status[aspect] =
-            "OK"
-
+        status[aspect] = "OK"
         return
     end
 
-
     local neededEssentia =
         target - currentEss
-
 
     local yield =
         safeNumber(
@@ -1060,41 +1044,46 @@ local function maintainAspect(aspect)
             1
         )
 
-
     if yield <= 0 then
-
-        status[aspect] =
-            "BAD YIELD"
-
+        status[aspect] = "BAD YIELD"
         return
     end
 
-
     local requiredItems =
         math.ceil(
-            neededEssentia
-            / yield
+            neededEssentia / yield
         )
-
 
     local available =
-        getSourceAmount(
-            aspect
-        )
-
+        getSourceAmount(aspect)
 
     sourceAmounts[aspect] =
         available
 
+    -- Не подаём следующую партию слишком быстро.
+    local now =
+        computer.uptime()
 
+    local previousFeed =
+        lastFeedTime[aspect]
+
+    if previousFeed
+        and now - previousFeed
+            < FEED_RECHECK_INTERVAL then
+
+        status[aspect] = "FEEDING"
+        return
+    end
+
+    -- Source есть.
     if available > 0 then
 
         local toExport =
             math.min(
                 available,
-                requiredItems
+                requiredItems,
+                MAX_FEED_BATCH
             )
-
 
         local moved =
             exportSource(
@@ -1102,16 +1091,25 @@ local function maintainAspect(aspect)
                 toExport
             )
 
-
         if moved > 0 then
+
+            lastFeedTime[aspect] =
+                now
+
+            status[aspect] =
+                "FEEDING"
+
             return
         end
     end
 
-
+    -- Source закончился — заказываем его.
     requestSourceCraft(
         aspect,
-        requiredItems
+        math.min(
+            requiredItems,
+            MAX_FEED_BATCH
+        )
     )
 end
 
