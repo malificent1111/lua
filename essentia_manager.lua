@@ -23,8 +23,7 @@ end
 assert(component.isAvailable("gpu"),
     "GPU component not found.")
 
-assert(component.isAvailable("me_controller"),
-    "ME Controller component not found.")
+--assert(component.isAvailable("me_controller"),"ME Controller component not found.")
 
 assert(component.isAvailable("me_interface"),
     "ME Interface component not found.")
@@ -33,7 +32,7 @@ assert(component.isAvailable("inventory_controller"),
     "Inventory Controller component not found.")
 
 local gpu = component.gpu
-local me = component.me_controller
+local me = component.me_interface
 local interface = component.me_interface
 local inventory = component.inventory_controller
 
@@ -84,7 +83,7 @@ local CARD_COLUMNS = 6
 local CARD_HEIGHT = 5
 
 local CARD_GAP_X = 1
-local CARD_GAP_Y = 0
+local CARD_GAP_Y = 1
 
 local HEADER_HEIGHT = 4
 local FOOTER_HEIGHT = 2
@@ -1793,13 +1792,11 @@ local function drawCardBorder(
     y,
     w,
     h,
-    color
+    accentColor
 )
 
-    gpu.setBackground(
-        color
-    )
-
+    -- Neutral outer frame.
+    gpu.setBackground(COLOR_BORDER)
 
     gpu.fill(
         x,
@@ -1808,7 +1805,6 @@ local function drawCardBorder(
         1,
         " "
     )
-
 
     gpu.fill(
         x,
@@ -1818,7 +1814,6 @@ local function drawCardBorder(
         " "
     )
 
-
     gpu.fill(
         x,
         y,
@@ -1826,7 +1821,6 @@ local function drawCardBorder(
         h,
         " "
     )
-
 
     gpu.fill(
         x + w - 1,
@@ -1837,9 +1831,19 @@ local function drawCardBorder(
     )
 
 
-    gpu.setBackground(
-        COLOR_BG
+    -- Small colored accent on the left.
+    gpu.setBackground(accentColor)
+
+    gpu.fill(
+        x,
+        y + 1,
+        1,
+        h - 2,
+        " "
     )
+
+
+    gpu.setBackground(COLOR_BG)
 end
 
 
