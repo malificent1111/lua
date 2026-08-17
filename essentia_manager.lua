@@ -80,9 +80,11 @@ local MAX_EXPORT_PER_RUN = 4096
 local width, height = gpu.getResolution()
 
 local CARD_COLUMNS = 6
-local CARD_HEIGHT = 4
+
+local CARD_HEIGHT = 5
+
 local CARD_GAP_X = 1
-local CARD_GAP_Y = 1
+local CARD_GAP_Y = 0
 
 local HEADER_HEIGHT = 4
 local FOOTER_HEIGHT = 2
@@ -94,7 +96,7 @@ local availableHeight =
 
 local CARD_ROWS =
     math.max(
-        2,
+        1,
         math.floor(
             availableHeight
             / (CARD_HEIGHT + CARD_GAP_Y)
@@ -113,6 +115,8 @@ local COLOR_BG = 0x181818
 local COLOR_PANEL = 0x222222
 local COLOR_PANEL_2 = 0x2E2E2E
 local COLOR_SELECTED = 0x344A63
+
+local COLOR_BORDER = 0x444444
 
 local COLOR_WHITE = 0xFFFFFF
 local COLOR_GREY = 0x888888
@@ -165,6 +169,7 @@ local lastCardSignatures = {}
 -- ============================================================
 
 local function safeNumber(value, fallback)
+
     local number = tonumber(value)
 
     if number == nil then
@@ -176,9 +181,13 @@ end
 
 
 local function numberString(value)
+
     value =
         math.floor(
-            safeNumber(value, 0)
+            safeNumber(
+                value,
+                0
+            )
         )
 
     local text = tostring(value)
@@ -219,7 +228,10 @@ end
 local function realEssentiaAmount(value)
 
     return math.floor(
-        safeNumber(value, 0)
+        safeNumber(
+            value,
+            0
+        )
         / ESSENTIA_SCALE
     )
 end
@@ -231,7 +243,10 @@ local function itemKey(name, damage)
         tostring(name or "")
         .. "|"
         .. tostring(
-            safeNumber(damage, 0)
+            safeNumber(
+                damage,
+                0
+            )
         )
 end
 
@@ -266,9 +281,7 @@ local function makeItemFilter(
 end
 
 
-local function getSourceFingerprint(
-    aspect
-)
+local function getSourceFingerprint(aspect)
 
     local current =
         config[aspect]
@@ -360,8 +373,6 @@ local function ensureConfig(aspect)
     end
 
 
-    -- Backward compatibility.
-
     if not current.sourceFingerprint then
 
         if current.sourceId
@@ -418,7 +429,8 @@ local function loadConfig()
         )
 
 
-    if ok and type(result) == "table" then
+    if ok
+        and type(result) == "table" then
 
         config = result
 
@@ -815,7 +827,9 @@ local function requestSourceCraft(
     amount =
         math.max(
             1,
-            math.floor(amount)
+            math.floor(
+                amount
+            )
         )
 
 
@@ -987,9 +1001,7 @@ end
 local function maintainAspect(aspect)
 
     local current =
-        ensureConfig(
-            aspect
-        )
+        ensureConfig(aspect)
 
 
     if not current.enabled then
@@ -1148,7 +1160,9 @@ end
 local function isActive(aspect)
 
     local currentConfig =
-        ensureConfig(aspect)
+        ensureConfig(
+            aspect
+        )
 
 
     if not currentConfig.enabled then
@@ -1189,7 +1203,9 @@ end
 
 local function isNew(aspect)
 
-    return not isConfigured(aspect)
+    return not isConfigured(
+        aspect
+    )
 end
 
 
@@ -1215,25 +1231,33 @@ local function rebuildFilteredAspects()
         elseif filterMode == "LOW" then
 
             include =
-                isLow(aspect)
+                isLow(
+                    aspect
+                )
 
 
         elseif filterMode == "ACTIVE" then
 
             include =
-                isActive(aspect)
+                isActive(
+                    aspect
+                )
 
 
         elseif filterMode == "ERRORS" then
 
             include =
-                isError(aspect)
+                isError(
+                    aspect
+                )
 
 
         elseif filterMode == "NEW" then
 
             include =
-                isNew(aspect)
+                isNew(
+                    aspect
+                )
         end
 
 
@@ -1287,36 +1311,49 @@ local function getCounters()
 
     for _, aspect in ipairs(aspects) do
 
-        if isConfigured(aspect) then
+        if isConfigured(
+            aspect
+        ) then
 
             counters.configured =
-                counters.configured + 1
+                counters.configured
+                + 1
 
         else
 
             counters.new =
-                counters.new + 1
+                counters.new
+                + 1
         end
 
 
-        if isActive(aspect) then
+        if isActive(
+            aspect
+        ) then
 
             counters.active =
-                counters.active + 1
+                counters.active
+                + 1
         end
 
 
-        if isLow(aspect) then
+        if isLow(
+            aspect
+        ) then
 
             counters.low =
-                counters.low + 1
+                counters.low
+                + 1
         end
 
 
-        if isError(aspect) then
+        if isError(
+            aspect
+        ) then
 
             counters.errors =
-                counters.errors + 1
+                counters.errors
+                + 1
         end
     end
 
@@ -1375,9 +1412,13 @@ local function refreshNetwork()
     aspects = {}
 
 
-    for aspect in pairs(knownAspects) do
+    for aspect in pairs(
+        knownAspects
+    ) do
 
-        ensureConfig(aspect)
+        ensureConfig(
+            aspect
+        )
 
 
         table.insert(
@@ -1392,7 +1433,9 @@ local function refreshNetwork()
     )
 
 
-    for _, aspect in ipairs(aspects) do
+    for _, aspect in ipairs(
+        aspects
+    ) do
 
         sourceAmounts[aspect] =
             getSourceAmount(
@@ -1472,7 +1515,8 @@ local function drawText(
 
 
     gpu.setForeground(
-        color or COLOR_WHITE
+        color
+        or COLOR_WHITE
     )
 
 
@@ -1487,7 +1531,7 @@ end
 local function drawCentered(
     x,
     y,
-    cardWidth,
+    w,
     value,
     color
 )
@@ -1498,20 +1542,20 @@ local function drawCentered(
         )
 
 
-    if #value > cardWidth - 2 then
+    if #value > w - 2 then
 
         value =
             value:sub(
                 1,
-                cardWidth - 2
+                w - 2
             )
     end
 
 
     local textX =
-        x
-        + math.floor(
-            (cardWidth - #value)
+        x +
+        math.floor(
+            (w - #value)
             / 2
         )
 
@@ -1563,14 +1607,14 @@ local function drawButton(
 
 
     local textX =
-        x +
-        math.floor(
-            (w - #label) / 2
+        x
+        + math.floor(
+            (w - #label)
+            / 2
         )
 
 
     if textX < x + 1 then
-
         textX =
             x + 1
     end
@@ -1590,14 +1634,17 @@ end
 
 
 -- ============================================================
--- STATUS COLORS
+-- CARD STATUS COLOR
 -- ============================================================
 
 local function getStatusColor(
     aspect
 )
 
-    if isNew(aspect) then
+    if isNew(
+        aspect
+    ) then
+
         return COLOR_PURPLE
     end
 
@@ -1616,7 +1663,8 @@ local function getStatusColor(
         return COLOR_ORANGE
 
 
-    elseif currentStatus == "CRAFTING SOURCE" then
+    elseif currentStatus
+        == "CRAFTING SOURCE" then
 
         return COLOR_BLUE
 
@@ -1626,13 +1674,18 @@ local function getStatusColor(
         return COLOR_GREY
 
 
-    elseif isError(aspect) then
+    elseif isError(
+        aspect
+    ) then
 
         return COLOR_RED
     end
 
 
-    if isLow(aspect) then
+    if isLow(
+        aspect
+    ) then
+
         return COLOR_YELLOW
     end
 
@@ -1645,19 +1698,25 @@ local function getStatusText(
     aspect
 )
 
-    if isNew(aspect) then
+    if isNew(
+        aspect
+    ) then
+
         return "NEW"
     end
 
 
-    if isLow(aspect)
+    if isLow(
+        aspect
+    )
         and status[aspect] == "OFF" then
 
         return "LOW"
     end
 
 
-    return status[aspect] or "-"
+    return status[aspect]
+        or "-"
 end
 
 
@@ -1669,8 +1728,10 @@ local function getCardGeometry(
     cardIndex
 )
 
-    local totalHorizontalGaps =
-        (CARD_COLUMNS - 1)
+    local totalGaps =
+        (
+            CARD_COLUMNS - 1
+        )
         * CARD_GAP_X
 
 
@@ -1678,20 +1739,24 @@ local function getCardGeometry(
         math.floor(
             (
                 width
-                - totalHorizontalGaps
+                - totalGaps
             )
             / CARD_COLUMNS
         )
 
 
     local column =
-        (cardIndex - 1)
+        (
+            cardIndex - 1
+        )
         % CARD_COLUMNS
 
 
     local row =
         math.floor(
-            (cardIndex - 1)
+            (
+                cardIndex - 1
+            )
             / CARD_COLUMNS
         )
 
@@ -1716,6 +1781,65 @@ local function getCardGeometry(
 
 
     return x, y, cardWidth
+end
+
+
+-- ============================================================
+-- CARD BORDER
+-- ============================================================
+
+local function drawCardBorder(
+    x,
+    y,
+    w,
+    h,
+    color
+)
+
+    gpu.setBackground(
+        color
+    )
+
+
+    gpu.fill(
+        x,
+        y,
+        w,
+        1,
+        " "
+    )
+
+
+    gpu.fill(
+        x,
+        y + h - 1,
+        w,
+        1,
+        " "
+    )
+
+
+    gpu.fill(
+        x,
+        y,
+        1,
+        h,
+        " "
+    )
+
+
+    gpu.fill(
+        x + w - 1,
+        y,
+        1,
+        h,
+        " "
+    )
+
+
+    gpu.setBackground(
+        COLOR_BG
+    )
 end
 
 
@@ -1753,17 +1877,9 @@ local function drawProgressBar(
     end
 
 
-    local usableWidth =
-        math.max(
-            4,
-            w
-        )
-
-
     local filled =
         math.floor(
-            usableWidth
-            * ratio
+            w * ratio
         )
 
 
@@ -1775,7 +1891,7 @@ local function drawProgressBar(
     gpu.fill(
         x,
         y,
-        usableWidth,
+        w,
         1,
         " "
     )
@@ -1870,7 +1986,7 @@ end
 
 
 -- ============================================================
--- DRAW ONE CARD
+-- DRAW CARD
 -- ============================================================
 
 local function drawCard(
@@ -1900,7 +2016,7 @@ local function drawCard(
         )
 
 
-    local color =
+    local statusColor =
         getStatusColor(
             aspect
         )
@@ -1924,10 +2040,10 @@ local function drawCard(
 
 
     gpu.fill(
-        x,
-        y,
-        cardWidth,
-        CARD_HEIGHT,
+        x + 1,
+        y + 1,
+        cardWidth - 2,
+        CARD_HEIGHT - 2,
         " "
     )
 
@@ -1937,20 +2053,31 @@ local function drawCard(
     )
 
 
+    drawCardBorder(
+        x,
+        y,
+        cardWidth,
+        CARD_HEIGHT,
+        statusColor
+    )
+
+
     -- --------------------------------------------------------
     -- Name
     -- --------------------------------------------------------
 
     drawText(
-        x + 1,
-        y,
-        prettyAspect(aspect),
+        x + 2,
+        y + 1,
+        prettyAspect(
+            aspect
+        ),
         COLOR_WHITE
     )
 
 
     -- --------------------------------------------------------
-    -- Auto indicator
+    -- AUTO indicator
     -- --------------------------------------------------------
 
     local currentConfig =
@@ -1959,17 +2086,12 @@ local function drawCard(
         )
 
 
-    local autoText = ""
-
-
     if currentConfig.enabled then
 
-        autoText = "●"
-
         drawText(
-            x + cardWidth - 2,
-            y,
-            autoText,
+            x + cardWidth - 3,
+            y + 1,
+            "●",
             COLOR_GREEN
         )
     end
@@ -1980,27 +2102,31 @@ local function drawCard(
     -- --------------------------------------------------------
 
     drawCentered(
-        x,
-        y + 1,
-        cardWidth,
-        numberString(current)
+        x + 1,
+        y + 2,
+        cardWidth - 2,
+        numberString(
+            current
+        )
         .. " / "
-        .. numberString(target),
+        .. numberString(
+            target
+        ),
         COLOR_WHITE
     )
 
 
     -- --------------------------------------------------------
-    -- Progress
+    -- Progress bar
     -- --------------------------------------------------------
 
     drawProgressBar(
-        x + 1,
-        y + 2,
-        cardWidth - 2,
+        x + 2,
+        y + 3,
+        cardWidth - 4,
         current,
         target,
-        color
+        statusColor
     )
 
 
@@ -2009,11 +2135,11 @@ local function drawCard(
     -- --------------------------------------------------------
 
     drawText(
-        x + 1,
-        y + 3,
+        x + 2,
+        y + 4,
         "● "
         .. statusText,
-        color
+        statusColor
     )
 end
 
@@ -2155,7 +2281,8 @@ local function drawFilters()
         1,
         "ALL "
         .. counters.total,
-        filterMode == "ALL"
+        filterMode == "ALL",
+        COLOR_SELECTED
     )
 
 
@@ -2277,7 +2404,9 @@ local function drawDashboard()
             signature
 
 
-        if lastCardSignatures[cardIndex]
+        if lastCardSignatures[
+            cardIndex
+        ]
             ~= signature then
 
             drawCard(
@@ -2292,7 +2421,9 @@ local function drawDashboard()
         #newSignatures + 1,
         CARDS_PER_PAGE do
 
-        if lastCardSignatures[index] then
+        if lastCardSignatures[
+            index
+        ] then
 
             local x, y, cardWidth =
                 getCardGeometry(
@@ -2319,6 +2450,10 @@ local function drawDashboard()
     lastCardSignatures =
         newSignatures
 
+
+    -- --------------------------------------------------------
+    -- Footer
+    -- --------------------------------------------------------
 
     local pageCount =
         math.max(
@@ -2414,9 +2549,11 @@ local function readNumber(
 
     term.clear()
 
+
     print(
         promptText
     )
+
 
     print(
         "Current: "
@@ -2424,6 +2561,7 @@ local function readNumber(
             default
         )
     )
+
 
     io.write("> ")
 
@@ -2440,7 +2578,9 @@ local function readNumber(
 
 
     local value =
-        tonumber(raw)
+        tonumber(
+            raw
+        )
 
 
     if not value then
@@ -2869,8 +3009,7 @@ local function editAspect(
 
             if current.essentiaPerItem <= 0 then
 
-                current.essentiaPerItem =
-                    1
+                current.essentiaPerItem = 1
             end
 
 
@@ -2946,13 +3085,14 @@ while true do
 
 
     -- --------------------------------------------------------
-    -- Network refresh
+    -- NETWORK REFRESH
     -- --------------------------------------------------------
 
     if now - lastRefresh
         >= REFRESH_INTERVAL then
 
-        local ok, errorMessage =
+        local ok,
+              errorMessage =
             pcall(
                 refreshNetwork
             )
@@ -2975,7 +3115,7 @@ while true do
 
 
     -- --------------------------------------------------------
-    -- Scanner refresh
+    -- SOURCE SCANNER UPDATE
     -- --------------------------------------------------------
 
     if now - lastScannerScan
@@ -2989,7 +3129,7 @@ while true do
 
 
     -- --------------------------------------------------------
-    -- Dashboard
+    -- UI
     -- --------------------------------------------------------
 
     if uiDirty then
@@ -3038,7 +3178,7 @@ while true do
 
 
             elseif x >= 14
-                and x < 26 then
+                and x < 27 then
 
                 filterMode = "LOW"
                 page = 1
@@ -3050,7 +3190,7 @@ while true do
 
 
             elseif x >= 27
-                and x < 39 then
+                and x < 40 then
 
                 filterMode = "ACTIVE"
                 page = 1
@@ -3062,7 +3202,7 @@ while true do
 
 
             elseif x >= 40
-                and x < 52 then
+                and x < 53 then
 
                 filterMode = "ERRORS"
                 page = 1
@@ -3074,7 +3214,7 @@ while true do
 
 
             elseif x >= 53
-                and x < 65 then
+                and x < 66 then
 
                 filterMode = "NEW"
                 page = 1
@@ -3087,12 +3227,13 @@ while true do
 
 
         -- ----------------------------------------------------
-        -- CARD
+        -- CARDS
         -- ----------------------------------------------------
 
         elseif y >= HEADER_HEIGHT + 1
             and y <
-                HEADER_HEIGHT + 1
+                HEADER_HEIGHT
+                + 1
                 + CARD_ROWS
                 * (
                     CARD_HEIGHT
@@ -3184,7 +3325,6 @@ while true do
 
                     selected = nil
 
-
                     lastCardSignatures = {}
 
                     fullRedraw = true
@@ -3216,7 +3356,6 @@ while true do
                 page =
                     page - 1
 
-
                 lastCardSignatures = {}
 
                 fullRedraw = true
@@ -3228,7 +3367,6 @@ while true do
 
                 page =
                     page + 1
-
 
                 lastCardSignatures = {}
 
